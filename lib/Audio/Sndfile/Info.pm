@@ -15,8 +15,10 @@ class Audio::Sndfile::Info is repr('CStruct') {
     constant TYPEMASK   = 0x0FFF0000;
     constant ENDMASK    = 0x30000000;
 
+    # the endian-ness of the data
     enum End( :File(0x00000000), :Little(0x10000000), :Big(0x20000000), :Cpu(0x30000000));
 
+    # The basic format of the file
     enum Format(
         :WAV(0x010000),
         :AIFF(0x020000),
@@ -44,6 +46,8 @@ class Audio::Sndfile::Info is repr('CStruct') {
         :MPC2K(0x210000),
         :RF64(0x220000)
     );
+
+    # the subformat or encoding of the data
     enum Subformat(
         :PCM_S8(0x0001),
         :PCM_16(0x0002),
@@ -73,16 +77,20 @@ class Audio::Sndfile::Info is repr('CStruct') {
         sf_format_check(self) == 1 ?? True !! False;
     }
 
-    method type() {
-        $!format +& TYPEMASK;
+    method type() returns Format {
+        Format($!format +& TYPEMASK);
     }
 
-    method sub-type() {
-        $!format +& SUBMASK;
+    method sub-type() returns Subformat {
+        Subformat($!format +& SUBMASK);
     }
 
-    method endian() {
-        $!format +& ENDMASK;
+    method endian() returns End {
+        End($!format +& ENDMASK);
+    }
+
+    method duration() returns Duration {
+        Duration.new($!frames/$!samplerate);
     }
 }
 

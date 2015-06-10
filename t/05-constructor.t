@@ -23,8 +23,15 @@ ok($f.info.format-check, "the library filled in the info so it should be good");
 is($f.info.channels,2, "got the expected number of channels");
 is($f.info.samplerate, 48000, "got the expected samplerate");
 is($f.info.format, 65538, "And it is a WAV PCM 16LE (Raw number)");
-is($f.info.type, Audio::Sndfile::Info::Format::WAV.Int, "It's a WAV");
-is($f.info.sub-type, Audio::Sndfile::Info::Subformat::PCM_16.Int, "It's a PCM 16");
+is($f.info.type, Audio::Sndfile::Info::Format::WAV, "It's a WAV");
+is($f.info.sub-type, Audio::Sndfile::Info::Subformat::PCM_16, "It's a PCM 16");
+isa-ok($f.info.duration, Duration, "duration returns a Duration object");
+is($f.info.duration, 0, "and because it is empty duration is 0");
+
+lives-ok { $f = Audio::Sndfile.new(filename => 't/data/1second_16le_48000_2ch.wav', :r) }, "open another file";
+
+# this got missed when Test was kebabed
+is_approx($f.info.duration,1.002667,"and this file has a duration of approximately 1 second (it's actually 48124 frames long)");
 
 throws-like { $f = Audio::Sndfile.new(filename => "bogus-test-file.wav", :r) },"System error : No such file or directory.", "constructor with bogus filename";
 
