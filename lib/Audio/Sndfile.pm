@@ -23,15 +23,46 @@ class Audio::Sndfile {
         method error() {
             sf_strerror(self);
         }
+
+        sub sf_readf_short(File , CArray[int16], int64) returns int64 is native('libsndfile') { * }
+
+        method read-short(Int $frames) returns Buf {
+            my $buff =  CArray[int16].new;
+
+            my $rc = sf_readf_short(self, $buff, $frames);
+
+            my @tmp_arr = gather {
+                                    take $buff[$_] for ^$rc;
+            };
+            Buf.new(@tmp_arr);
+        }
+
+        sub sf_readf_int(File , CArray[int32], int64) returns int64 is native('libsndfile') { * }
+
+        method read-int(Int $frames) returns Buf {
+            my @buff :=  CArray[int32].new;
+
+            my $rc = sf_readf_int(self, @buff, $frames);
+            my @tmp_arr = gather {
+                                    take @buff[$_] for ^$rc;
+            };
+            Buf.new(@tmp_arr);
+        }
+
     }
 
     enum OpenMode (:Read(0x10), :Write(0x20), :ReadWrite(0x30));
 
     has Str  $.filename;
-    has File $!file;
+    has File $!file handles <read-short read-int>;
     has Audio::Sndfile::Info $.info;
     has OpenMode $.mode;
 
+    sub sf_version_string() returns Str is native('libsndfile') { * }
+
+    method library-version() returns Str {
+        sf_version_string();
+    }
 
     sub sf_open(Str $filename, int $mode, Audio::Sndfile::Info $info) returns File is native('libsndfile') { * }
 
