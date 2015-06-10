@@ -22,7 +22,9 @@ is($f.mode, Audio::Sndfile::OpenMode::Read, "and it has Read");
 ok($f.info.format-check, "the library filled in the info so it should be good");
 is($f.info.channels,2, "got the expected number of channels");
 is($f.info.samplerate, 48000, "got the expected samplerate");
-is($f.info.format, 65538, "And it is a WAV PCM 16LE");
+is($f.info.format, 65538, "And it is a WAV PCM 16LE (Raw number)");
+is($f.info.type, Audio::Sndfile::Info::Format::WAV.Int, "It's a WAV");
+is($f.info.sub-type, Audio::Sndfile::Info::Subformat::PCM_16.Int, "It's a PCM 16");
 
 throws-like { $f = Audio::Sndfile.new(filename => "bogus-test-file.wav", :r) },"System error : No such file or directory.", "constructor with bogus filename";
 
