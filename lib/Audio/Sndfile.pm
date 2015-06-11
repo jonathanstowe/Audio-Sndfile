@@ -50,13 +50,27 @@ class Audio::Sndfile {
             };
             @tmp_arr;
         }
+
+        sub sf_readf_double(File , CArray[int64], int64) returns int64 is native('libsndfile') { * }
+
+        method read-double(Int $frames) returns Array {
+            my $buff =  CArray[int64].new;
+            $buff[$frames * 2] = 0;
+
+            my $rc = sf_readf_double(self, $buff, $frames);
+            my @tmp_arr = gather {
+                                    take $buff[$_] for ^$rc;
+            };
+            @tmp_arr;
+        }
+
         sub sf_readf_float(File , CArray[num], int64) returns int64 is native('libsndfile') { * }
 
         method read-float(Int $frames) returns Array {
             my $buff =  CArray[num].new;
             $buff[$frames * 2] = 0;
 
-            my $rc = sf_readf_int(self, $buff, $frames);
+            my $rc = sf_readf_float(self, $buff, $frames);
             my @tmp_arr = gather {
                                     take $buff[$_] for ^$rc;
             };
@@ -68,7 +82,7 @@ class Audio::Sndfile {
     enum OpenMode (:Read(0x10), :Write(0x20), :ReadWrite(0x30));
 
     has Str  $.filename;
-    has File $!file handles <read-short read-int read-float>;
+    has File $!file handles <read-short read-int read-float read-double>;
     has Audio::Sndfile::Info $.info;
     has OpenMode $.mode;
 

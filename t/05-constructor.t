@@ -39,6 +39,7 @@ is_approx($f.info.duration,1.002667,"and this file has a duration of approximate
 is($f.read-short(10).elems, 10, "managed to read ten frames with read-short");
 is($f.read-int(10).elems, 10, "managed to read ten frames with read-int");
 is($f.read-float(10).elems, 10, "managed to read ten frames with read-float");
+is($f.read-double(10).elems, 10, "managed to read ten frames with read-double");
 
 throws-like { $f = Audio::Sndfile.new(filename => "bogus-test-file.wav", :r) },"System error : No such file or directory.", "constructor with bogus filename";
 
