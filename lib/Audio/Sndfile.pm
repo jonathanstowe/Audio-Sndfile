@@ -24,57 +24,40 @@ class Audio::Sndfile {
             sf_strerror(self);
         }
 
-        sub sf_readf_short(File , CArray[int16], int64) returns int64 is native('libsndfile') { * }
-
-        method read-short(Int $frames, Audio::Sndfile::Info $info) returns Array {
+        method !read-read(Int $frames, Audio::Sndfile::Info $info, &read-sub) returns Array {
             my $buff =  CArray[int16].new;
             $buff[$frames * $info.channels] = 0;
 
-            my $rc = sf_readf_short(self, $buff, $frames);
+            my $rc = &read-sub(self, $buff, $frames);
 
             my @tmp_arr = gather {
                                     take $buff[$_] for ^($rc * $info.channels);
             };
             @tmp_arr;
+        }
+
+        sub sf_readf_short(File , CArray[int16], int64) returns int64 is native('libsndfile') { * }
+
+        method read-short(Int $frames, Audio::Sndfile::Info $info) returns Array {
+            self!read-read($frames, $info, &sf_readf_short);
         }
 
         sub sf_readf_int(File , CArray[int32], int64) returns int64 is native('libsndfile') { * }
 
         method read-int(Int $frames, Audio::Sndfile::Info $info) returns Array {
-            my $buff =  CArray[int32].new;
-            $buff[$frames * $info.channels] = 0;
-
-            my $rc = sf_readf_int(self, $buff, $frames);
-            my @tmp_arr = gather {
-                                    take $buff[$_] for ^($rc * $info.channels);
-            };
-            @tmp_arr;
+            self!read-read($frames, $info, &sf_readf_int);
         }
 
         sub sf_readf_double(File , CArray[int64], int64) returns int64 is native('libsndfile') { * }
 
         method read-double(Int $frames, Audio::Sndfile::Info $info) returns Array {
-            my $buff =  CArray[int64].new;
-            $buff[$frames * $info.channels] = 0;
-
-            my $rc = sf_readf_double(self, $buff, $frames);
-            my @tmp_arr = gather {
-                                    take $buff[$_] for ^($rc * $info.channels);
-            };
-            @tmp_arr;
+            self!read-read($frames, $info, &sf_readf_double);
         }
 
         sub sf_readf_float(File , CArray[num], int64) returns int64 is native('libsndfile') { * }
 
         method read-float(Int $frames, Audio::Sndfile::Info $info) returns Array {
-            my $buff =  CArray[num].new;
-            $buff[$frames * $info.channels] = 0;
-
-            my $rc = sf_readf_float(self, $buff, $frames);
-            my @tmp_arr = gather {
-                                    take $buff[$_] for ^($rc * $info.channels);
-            };
-            @tmp_arr;
+            self!read-read($frames, $info, &sf_readf_float);
         }
 
         sub sf_write_sync(File) is native('libsndfile') { * }
