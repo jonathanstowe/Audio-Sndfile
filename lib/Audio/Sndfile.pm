@@ -26,53 +26,53 @@ class Audio::Sndfile {
 
         sub sf_readf_short(File , CArray[int16], int64) returns int64 is native('libsndfile') { * }
 
-        method read-short(Int $frames) returns Array {
+        method read-short(Int $frames, Audio::Sndfile::Info $info) returns Array {
             my $buff =  CArray[int16].new;
-            $buff[$frames * 2] = 0;
+            $buff[$frames * $info.channels] = 0;
 
             my $rc = sf_readf_short(self, $buff, $frames);
 
             my @tmp_arr = gather {
-                                    take $buff[$_] for ^$rc;
+                                    take $buff[$_] for ^($rc * $info.channels);
             };
             @tmp_arr;
         }
 
         sub sf_readf_int(File , CArray[int32], int64) returns int64 is native('libsndfile') { * }
 
-        method read-int(Int $frames) returns Array {
+        method read-int(Int $frames, Audio::Sndfile::Info $info) returns Array {
             my $buff =  CArray[int32].new;
-            $buff[$frames * 2] = 0;
+            $buff[$frames * $info.channels] = 0;
 
             my $rc = sf_readf_int(self, $buff, $frames);
             my @tmp_arr = gather {
-                                    take $buff[$_] for ^$rc;
+                                    take $buff[$_] for ^($rc * $info.channels);
             };
             @tmp_arr;
         }
 
         sub sf_readf_double(File , CArray[int64], int64) returns int64 is native('libsndfile') { * }
 
-        method read-double(Int $frames) returns Array {
+        method read-double(Int $frames, Audio::Sndfile::Info $info) returns Array {
             my $buff =  CArray[int64].new;
-            $buff[$frames * 2] = 0;
+            $buff[$frames * $info.channels] = 0;
 
             my $rc = sf_readf_double(self, $buff, $frames);
             my @tmp_arr = gather {
-                                    take $buff[$_] for ^$rc;
+                                    take $buff[$_] for ^($rc * $info.channels);
             };
             @tmp_arr;
         }
 
         sub sf_readf_float(File , CArray[num], int64) returns int64 is native('libsndfile') { * }
 
-        method read-float(Int $frames) returns Array {
+        method read-float(Int $frames, Audio::Sndfile::Info $info) returns Array {
             my $buff =  CArray[num].new;
-            $buff[$frames * 2] = 0;
+            $buff[$frames * $info.channels] = 0;
 
             my $rc = sf_readf_float(self, $buff, $frames);
             my @tmp_arr = gather {
-                                    take $buff[$_] for ^$rc;
+                                    take $buff[$_] for ^($rc * $info.channels);
             };
             @tmp_arr;
         }
@@ -88,7 +88,7 @@ class Audio::Sndfile {
     enum OpenMode (:Read(0x10), :Write(0x20), :ReadWrite(0x30));
 
     has Str  $.filename;
-    has File $!file handles <read-short read-int read-float read-double>;
+    has File $!file; 
     has Audio::Sndfile::Info $.info;
     has OpenMode $.mode;
 
@@ -125,6 +125,22 @@ class Audio::Sndfile {
         else {
             die "exactly one of ':r', ':w', ':rw' must be provided";
         }
+    }
+
+    method read-short(Int $frames) returns Array {
+        $!file.read-short($frames, $!info);
+    }
+
+    method read-int(Int $frames) returns Array {
+        $!file.read-int($frames, $!info);
+    }
+        
+    method read-float(Int $frames) returns Array {
+        $!file.read-float($frames, $!info);
+    }
+        
+    method read-double(Int $frames) returns Array {
+        $!file.read-double($frames, $!info);
     }
 }
 
