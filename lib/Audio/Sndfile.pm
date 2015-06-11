@@ -77,6 +77,12 @@ class Audio::Sndfile {
             @tmp_arr;
         }
 
+        sub sf_write_sync(File) is native('libsndfile') { * }
+
+        method sync() {
+            sf_write_sync(self);
+        }
+
     }
 
     enum OpenMode (:Read(0x10), :Write(0x20), :ReadWrite(0x30));
