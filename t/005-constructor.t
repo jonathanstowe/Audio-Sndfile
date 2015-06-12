@@ -29,6 +29,7 @@ is($f.info.type, Audio::Sndfile::Info::Format::WAV, "It's a WAV");
 is($f.info.sub-type, Audio::Sndfile::Info::Subformat::PCM_16, "It's a PCM 16");
 isa-ok($f.info.duration, Duration, "duration returns a Duration object");
 is($f.info.duration, 0, "and because it is empty duration is 0");
+lives-ok { $f.close() }, "close";
 
 lives-ok { $f = Audio::Sndfile.new(filename => 't/data/1second_16le_48000_2ch.wav', :r) }, "open another file";
 
@@ -40,6 +41,8 @@ is($f.read-short(10).elems, 20, "managed to read ten frames with read-short");
 is($f.read-int(10).elems, 20, "managed to read ten frames with read-int");
 is($f.read-float(10).elems, 20, "managed to read ten frames with read-float");
 is($f.read-double(10).elems, 20, "managed to read ten frames with read-double");
+
+lives-ok { $f.close() }, "close";
 
 throws-like { $f = Audio::Sndfile.new(filename => "bogus-test-file.wav", :r) },"System error : No such file or directory.", "constructor with bogus filename";
 
