@@ -126,4 +126,6 @@ class Audio::Sndfile {
     }
 }
 
+sub infix:<~~> (Audio::Sndfile:D $as, Audio::Sndfile::Info::Format $type) { $as.info.type == $type }
+
 # vim: expandtab shiftwidth=4 ft=perl6
