@@ -8,7 +8,7 @@ class Audio::Sndfile::Info is repr('CStruct') {
     has int32     $.sections;
     has int32     $.seekable;
 
-    sub  sf_format_check(Audio::Sndfile::Info $info) returns int is native('libsndfile') { * }
+    sub  sf_format_check(Audio::Sndfile::Info $info) returns int32 is native('libsndfile') { * }
 
     # Masks to get at the parts of format
     constant SUBMASK    = 0x0000FFFF;
