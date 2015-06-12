@@ -7,13 +7,13 @@ class Audio::Sndfile {
     # The opaque type returned from open
     my class File is repr('CPointer') {
 
-        sub sf_close(File $file) returns int is native('libsndfile') { * }
+        sub sf_close(File $file) returns int32 is native('libsndfile') { * }
 
         method close() {
             sf_close(self);
         }
 
-        sub sf_error(File $file) returns int is native('libsndfile') { * }
+        sub sf_error(File $file) returns int32 is native('libsndfile') { * }
 
         method error-number() {
             sf_error(self);
@@ -24,8 +24,7 @@ class Audio::Sndfile {
             sf_strerror(self);
         }
 
-        method !read-read(Int $frames, Audio::Sndfile::Info $info, &read-sub) returns Array {
-            my $buff =  CArray[int16].new;
+        method !read-read(Int $frames, Audio::Sndfile::Info $info, &read-sub, $buff) returns Array {
             $buff[$frames * $info.channels] = 0;
 
             my $rc = &read-sub(self, $buff, $frames);
@@ -38,25 +37,29 @@ class Audio::Sndfile {
         sub sf_readf_short(File , CArray[int16], int64) returns int64 is native('libsndfile') { * }
 
         method read-short(Int $frames, Audio::Sndfile::Info $info) returns Array {
-            self!read-read($frames, $info, &sf_readf_short);
+            my $buff =  CArray[int16].new;
+            self!read-read($frames, $info, &sf_readf_short, $buff);
         }
 
         sub sf_readf_int(File , CArray[int32], int64) returns int64 is native('libsndfile') { * }
 
         method read-int(Int $frames, Audio::Sndfile::Info $info) returns Array {
-            self!read-read($frames, $info, &sf_readf_int);
+            my $buff =  CArray[int32].new;
+            self!read-read($frames, $info, &sf_readf_int, $buff);
         }
 
         sub sf_readf_double(File , CArray[int64], int64) returns int64 is native('libsndfile') { * }
 
         method read-double(Int $frames, Audio::Sndfile::Info $info) returns Array {
-            self!read-read($frames, $info, &sf_readf_double);
+            my $buff =  CArray[int64].new;
+            self!read-read($frames, $info, &sf_readf_double, $buff);
         }
 
-        sub sf_readf_float(File , CArray[num], int64) returns int64 is native('libsndfile') { * }
+        sub sf_readf_float(File , CArray[num32], int64) returns int64 is native('libsndfile') { * }
 
         method read-float(Int $frames, Audio::Sndfile::Info $info) returns Array {
-            self!read-read($frames, $info, &sf_readf_float);
+            my $buff =  CArray[num32].new;
+            self!read-read($frames, $info, &sf_readf_float, $buff);
         }
 
         sub sf_write_sync(File) is native('libsndfile') { * }
@@ -70,7 +73,7 @@ class Audio::Sndfile {
     enum OpenMode (:Read(0x10), :Write(0x20), :ReadWrite(0x30));
 
     has Str  $.filename;
-    has File $!file; 
+    has File $!file handles <close>; 
     has Audio::Sndfile::Info $.info;
     has OpenMode $.mode;
 
@@ -80,7 +83,7 @@ class Audio::Sndfile {
         sf_version_string();
     }
 
-    sub sf_open(Str $filename, int $mode, Audio::Sndfile::Info $info) returns File is native('libsndfile') { * }
+    sub sf_open(Str $filename, int32 $mode, Audio::Sndfile::Info $info) returns File is native('libsndfile') { * }
 
     submethod BUILD(Str() :$!filename!, Bool :$r, Bool :$w, Bool :$rw, *%info) {
         if one($r, $w, $rw ) {
@@ -126,6 +129,6 @@ class Audio::Sndfile {
     }
 }
 
-sub infix:<~~> (Audio::Sndfile:D $as, Audio::Sndfile::Info::Format $type) { $as.info.type == $type }
+multi sub infix:<~~> (Audio::Sndfile:D $as, Audio::Sndfile::Info::Format $type) { $as.info.type == $type }
 
 # vim: expandtab shiftwidth=4 ft=perl6
