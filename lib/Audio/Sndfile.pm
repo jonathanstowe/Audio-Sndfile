@@ -30,9 +30,8 @@ class Audio::Sndfile {
 
             my $rc = &read-sub(self, $buff, $frames);
 
-            my @tmp_arr = gather {
-                                    take $buff[$_] for ^($rc * $info.channels);
-            };
+            my @tmp_arr =  (^($rc * $info.channels)).map({ $buff[$_] });
+            
             @tmp_arr;
         }
 
@@ -126,7 +125,5 @@ class Audio::Sndfile {
         $!file.read-double($frames, $!info);
     }
 }
-
-sub infix:<~~> (Audio::Sndfile:D $as, Audio::Sndfile::Info::Format $type) { $as.info.type == $type }
 
 # vim: expandtab shiftwidth=4 ft=perl6
