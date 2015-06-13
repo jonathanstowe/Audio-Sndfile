@@ -48,10 +48,10 @@ class Audio::Sndfile {
             self!read-read($frames, $info, &sf_readf_int, $buff);
         }
 
-        sub sf_readf_double(File , CArray[int64], int64) returns int64 is native('libsndfile') { * }
+        sub sf_readf_double(File , CArray[num64], int64) returns int64 is native('libsndfile') { * }
 
         method read-double(Int $frames, Audio::Sndfile::Info $info) returns Array {
-            my $buff =  CArray[int64].new;
+            my $buff =  CArray[num64].new;
             self!read-read($frames, $info, &sf_readf_double, $buff);
         }
 
