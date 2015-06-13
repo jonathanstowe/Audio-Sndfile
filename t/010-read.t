@@ -34,6 +34,11 @@ for @tests -> $test {
     my Audio::Sndfile $obj;
     lives-ok { $obj = Audio::Sndfile.new(filename => $test<filename>, :r) }, "get " ~ $test<filename>;
     is($obj.format, $test<format>, "got the right format");
+    is($obj.frames, $test<frames>, "got the right number of frames");
+    is($obj.seekable, $test<seekable>, "seekable");
+    is($obj.samplerate, $test<sample-rate>, "got the right sample rate");
+    is($obj.channels, $test<channels>, "got the right number of channels");
+    is($obj.sections, $test<sections>, "got the right sections");
 
     lives-ok { $obj.close }, "close that";
 }
