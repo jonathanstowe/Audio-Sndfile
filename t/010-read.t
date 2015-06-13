@@ -40,6 +40,25 @@ for @tests -> $test {
     is($obj.channels, $test<channels>, "got the right number of channels");
     is($obj.sections, $test<sections>, "got the right sections");
 
+    my @data;
+
+    lives-ok { @data = $obj.read-short(100) }, "read 100 frames with read-short";
+    is(@data.elems, 100 * $obj.channels, "got the correct number of elements");
+    ok(@data[0] ~~ Int, "and it is an Int");
+    ok(@data[0].defined, "and it is actually defined");
+    lives-ok { @data = $obj.read-int(100) }, "read 100 frames with read-int";
+    is(@data.elems, 100 * $obj.channels, "got the correct number of elements");
+    ok(@data[0] ~~ Int, "and it is an Int");
+    ok(@data[0].defined, "and it is actually defined");
+    lives-ok { @data = $obj.read-float(100) }, "read 100 frames with read-float";
+    is(@data.elems, 100 * $obj.channels, "got the correct number of elements");
+    ok(@data[0] ~~ Num, "and it is a Num");
+    ok(@data[0].defined, "and it is actually defined");
+    lives-ok { @data = $obj.read-double(100) }, "read 100 frames with read-double";
+    is(@data.elems, 100 * $obj.channels, "got the correct number of elements");
+    ok(@data[0] ~~ Num, "and it is a Num");
+    ok(@data[0].defined, "and it is actually defined");
+
     lives-ok { $obj.close }, "close that";
 }
 
