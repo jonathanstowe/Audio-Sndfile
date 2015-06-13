@@ -127,8 +127,12 @@ class Audio::Sndfile {
     method read-double(Int $frames) returns Array {
         $!file.read-double($frames, $!info);
     }
+
+    method Numeric() {
+        $!info.type;
+    }
+
 }
 
-multi sub infix:<~~> (Audio::Sndfile:D $as, Audio::Sndfile::Info::Format $type) { $as.info.type == $type }
 
 # vim: expandtab shiftwidth=4 ft=perl6
