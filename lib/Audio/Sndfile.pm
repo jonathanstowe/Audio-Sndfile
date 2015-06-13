@@ -74,7 +74,7 @@ class Audio::Sndfile {
 
     has Str  $.filename;
     has File $!file handles <close>; 
-    has Audio::Sndfile::Info $.info;
+    has Audio::Sndfile::Info $.info handles <format channels samplerate frames sections seekable type sub-type endian duration>;
     has OpenMode $.mode;
 
     sub sf_version_string() returns Str is native('libsndfile') { * }

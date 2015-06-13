@@ -33,7 +33,7 @@ my @tests = (
 for @tests -> $test {
     my Audio::Sndfile $obj;
     lives-ok { $obj = Audio::Sndfile.new(filename => $test<filename>, :r) }, "get " ~ $test<filename>;
-    is($obj.info.format, $test<format>, "got the right format");
+    is($obj.format, $test<format>, "got the right format");
 
     lives-ok { $obj.close }, "close that";
 }

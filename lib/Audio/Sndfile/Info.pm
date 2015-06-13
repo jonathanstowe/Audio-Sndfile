@@ -6,7 +6,7 @@ class Audio::Sndfile::Info is repr('CStruct') {
     has int32     $.channels;
     has int32     $.format;
     has int32     $.sections;
-    has int32     $.seekable;
+    has int32     $._seekable;
 
     sub  sf_format_check(Audio::Sndfile::Info $info) returns int32 is native('libsndfile') { * }
 
@@ -75,6 +75,10 @@ class Audio::Sndfile::Info is repr('CStruct') {
     );
     method format-check() returns Bool {
         sf_format_check(self) == 1 ?? True !! False;
+    }
+
+    method seekable() returns Bool {
+        $!_seekable == 1 ?? True !! False;
     }
 
     method type() returns Format {
