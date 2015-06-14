@@ -289,6 +289,7 @@ for @tests -> $file {
     my $double-name = $test-output.child("double-$basename");
     my $double-obj;
     lives-ok { $double-obj = Audio::Sndfile.new(filename => $double-name, info => $cinfo, :w) }, "open $double-name for writing";
+    todo("Bug with CArray[num64]", 8);
     lives-ok { $i = $double-obj.write-double(@doubles) }, "write-double";
     is($i, 100, "and it did write 100 frames");
     lives-ok { $double-obj.close }, "close that file to reopen";
