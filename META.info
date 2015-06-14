@@ -10,6 +10,7 @@
   "source-url" : "git://github.com/jonathanstowe/Audio-Sndfile.git",
   "perl" : "v6",
   "build-depends" : [
+		"LibraryCheck"
   ],
   "provides" : {
     "Audio::Sndfile" : "lib/Audio/Sndfile.pm",
