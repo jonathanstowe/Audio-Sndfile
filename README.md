@@ -9,7 +9,7 @@ various formats by using the API provided by libsndfile.
 
 A full list of the formats it is able to work with can be found at:
 
-    http://www.mega-nerd.com/libsndfile/#Features
+http://www.mega-nerd.com/libsndfile/#Features
 
 if you need to work with formats that aren't listed then you will need to
 find another library.
@@ -32,7 +32,7 @@ already have it installed.
 If you are on some platform that doesn't provide libsndfile as a package
 then you may be able to install it from source:
 
-    http://www.mega-nerd.com/libsndfile/#Download
+http://www.mega-nerd.com/libsndfile/#Download
 
 I am however unlikely to be able to offer help with installing it this way.
 
@@ -65,7 +65,7 @@ This should be considered experimental software until such time that
 Perl 6 reaches an official release.  However suggestions/patches are
 welcomed via github at
 
-    https://github.com/jonathanstowe/Audio-Sndfile
+https://github.com/jonathanstowe/Audio-Sndfile
 
 There are several things that I know don't work properly at the time of the
 first release:
