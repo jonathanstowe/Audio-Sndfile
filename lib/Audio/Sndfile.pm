@@ -1,5 +1,43 @@
 use NativeCall;
 
+=begin pod
+
+=head1 NAME
+
+Audio::Sndfile - read/write audio data via libsndfile
+
+=head1 SYNOPSIS
+
+=begin code
+
+=end code
+
+Other examples are available in the "examples" sub-directory of the
+repository.
+
+=head1 DESCRIPTION
+
+This library provides a mechanism to read and write audio data files in
+various formats by using the API provided by libsndfile.
+
+A full list of the formats it is able to work with can be found at:
+
+http://www.mega-nerd.com/libsndfile/#Features
+
+if you need to work with formats that aren't listed then you will need to
+find another library.
+
+The interface presented is slightly simplified with regard to that of
+libsndfile and whilst it does nearly everything I need it do, I have opted
+to release the most useful functionality early and progressively add
+features as it becomes clear how they should be implemented.
+
+
+=head2 METHODS
+
+
+=end pod
+
 class Audio::Sndfile {
 
     use Audio::Sndfile::Info;
