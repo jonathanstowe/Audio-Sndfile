@@ -24,17 +24,251 @@ A full list of the formats it is able to work with can be found at:
 
 http://www.mega-nerd.com/libsndfile/#Features
 
-if you need to work with formats that aren't listed then you will need to
-find another library.
+if you need to work with formats that aren't listed then you will need
+to find another library.
 
 The interface presented is slightly simplified with regard to that of
-libsndfile and whilst it does nearly everything I need it do, I have opted
-to release the most useful functionality early and progressively add
-features as it becomes clear how they should be implemented.
+libsndfile and whilst it does nearly everything I need it do, I have
+opted to release the most useful functionality early and progressively
+add features as it becomes clear how they should be implemented.
 
+As of the first release, the methods provided for writing audio data do
+not constrain the items to the range expected by the method.  If out of
+range data is supplied wrapping will occur which may lead to unexpected
+results.
+
+=head3 FRAMES vs ITEMS
+
+In the description of the L<methods|#METHODS> below a 'frame' refers to
+one or more items ( that is  the number of channels in the audio data.)
+The frame data is interleaved per channel consecutively and must always
+have a number of items that is a multiple of the number of channels.
+The read methods will always return a number of items that is the
+multiple of number of channels - thus you can determine if you got the
+number back that you requested with something like:
+
+     @frames.elems == ( $num-channels * $frames-requested)
+
+The write methods will throw an exception if supplied with an array that
+isn't some multiple of the number of channels and will always return
+the number of 'frames' written.
+
+There are no methods provided for interleaving or de-interleaving frame
+data as Perl's list methods (e.g. C<zip> or C<rotor>) are perfect for
+this task.
 
 =head2 METHODS
 
+=head3 new
+
+    method new(Audio::Sndfile:U: Str :$filename!, :r)
+
+The C<:r> adverb opens the specified file for reading.  If the file
+can't be opened or there is some other problem with it (such as it not
+being a supported format,) then an exception will be thrown.
+
+    method new(Audio::Sndfile:U: Str :$filename!, :w, Audio::Sndfile::Info :$info) 
+    method new(Audio::Sndfile:U: Str :$filename!, :w, *%info)
+
+The C<:w> adverb opens the specified file for writing.  It requires
+either an existing valid L<Audio::Sndfile::Info> supplied as the C<info>
+named parameter, or attributes that will be passed to the constructor of
+L<Audio::Sndfile::Info>.  If the file cannot be opened for some reason
+or the resulting  L<Audio::Sndfile::Info> is incomplete or invalid an
+exception will be thrown.
+
+The info requires the attributes C<channels>, C<format>,
+C<samplerate>. If copying or converting an existing file opened for
+reading the L<clone-info|#clone-info> method can be used to obtain a
+valid L<Audio::Sndfile::Info>.
+
+=head3 info
+
+This is an accessor to the L<Audio::Sndfile::Info> for the opened file. It is
+read-only as it doesn't make sense to change the info after the file has been
+opened.
+
+There are several accessors delegated to this object:
+
+=item format 
+
+The format of the file formed by the bitwise or of C<type>, C<sub-type> and C<endian>
+
+=item channels 
+
+The number of channels in the file.
+
+=item samplerate 
+
+The sample rate of the file as an Int (e.g. 44100, 48000).
+
+=item frames 
+
+The number of frames in the file.  This only makes sense when the file is opened
+for reading.
+
+=item sections 
+
+=item seekable 
+
+A Bool indicating whether the open file is seekable, this will be True for most
+regular files and False for special files such as a pipe, however as there currently
+isn't any easy way to open other than a regular file this may not be useful.
+
+=item type 
+
+A value of the enum L<Audio::Sndfile::Info::Format> indicating the major format of the
+file (e.g. WAV,) this is bitwise or-ed with the C<sub-type> and C<endian> to create
+C<format> (which is what is used by the underlying library functions.)
+
+=item sub-type 
+
+A value of the enum L<Audio::Sndfile::Info::Subformat> indicating the minor format or
+sample encoding of the file (e.g PCM_16, FLOAT, ) this is bitwise or-ed with the C<type>
+and C<endian> to create C<format>
+
+=item endian 
+
+A value of the enum L<Audio::Sndfile::Info::End> that indicate the endian-ness of the
+sample data.  This is bitwise or-ed with C<type> and C<sub-type> to provide C<format>.
+
+=item duration
+
+A L<Duration> object that describes the duration of the file in (possibly fractional) seconds.
+This probably only makes sense for files opened for reading.
+
+=head3 library-version
+
+    method library-version(Audio::Sndfile:D: ) returns Str
+
+Returns a string representation of the version reported by libsndfile.
+
+=head3 close 
+
+    method close(Audio::Sndfile:D:) returns Int
+
+This closes the file stream for the opened file. Attempting to write or
+read the object after this has been called is an error.
+
+=head3 error-number 
+
+    method error-number(Audio::Sndfile:D:) returns Int
+
+This returns non-zero if there was an error in the last read, write
+or open operation. The actual error message can be obtained with
+L<error|#error> below.
+
+=head3 error 
+
+    method error(Audio::Sndfile:D:) returns Str
+
+This will return the string describing the last error if
+L<error-number|#error-number> was non-zero or 'No Error' otherwise.
+
+=head3 sync
+
+    method sync(Audio::Sndfile:D:) returns Int
+
+If the file is opened for writing then any buffered data will be flushed
+to disk.  If the file was opened for reading it does nothing.
+
+=head3 read-short
+
+    method read-short(Audio::Sndfile:D: Int $frames) returns Array[int16]
+
+This returns an array of size C<$frames> * $num-channels of 16 bit
+integers from the opened file.  The returned array may be empty or
+shorter than expected if there is no more data to read.
+
+=head3 write-short
+
+    method write-short(Audio::Sndfile:D: @frames) returns Int
+
+This writes the array @frames of 16 bit integers to the file. @frames
+must have a number of elements that is a multiple of the number of
+channels or an exception will be thrown.
+
+If the files isn't opened for writing or if it has been closed an error
+will occur.
+
+If the values are outside the range for an int16 then wrapping will occur.
+
+
+=head3 read-int
+
+    method read-int(Audio::Sndfile:D: Int $frames) returns Array[Int]
+
+This returns an array of size C<$frames> * $num-channels of 32 bit
+integers from the opened file.  The returned array may be empty or
+shorter than expected if there is no more data to read.
+
+=head3 write-int
+
+    method write-int(Audio::Sndfile:D: @frames) returns Int
+
+This writes the array @frames of 32 bit integers to the file. @frames
+must have a number of elements that is a multiple of the number of
+channels or an exception will be thrown.
+
+If the files isn't opened for writing or if it has been closed an error
+will occur.
+
+If the values are outside the range for an int32 then wrapping will occur.
+
+=head3 read-float
+
+    method read-float(Audio::Sndfile:D: Int $frames) returns Array[num32]
+
+This returns an array of size C<$frames> * $num-channels of 32 bit
+floating point numbers from the opened file.  The returned array may be empty or
+shorter than expected if there is no more data to read.
+
+=head3 write-float
+
+    method write-float(Audio::Sndfile:D: @frames) returns Int
+
+This writes the array @frames of 32 bit floating point numbers to the
+file. @frames must have a number of elements that is a multiple of the
+number of channels or an exception will be thrown.
+
+If the files isn't opened for writing or if it has been closed an error
+will occur.
+
+If the values are outside the range for a num32 then wrapping will occur.
+
+=head3 read-double
+
+    method read-double(Audio::Sndfile:D: Int $frames) returns Array[num64]
+
+This returns an array of size C<$frames> * $num-channels of 64 bit
+floating point numbers from the opened file.  The returned array may be empty or
+shorter than expected if there is no more data to read.
+
+=head3 write-double
+
+    method write-double(Audio::Sndfile:D: @frames) returns Int
+
+This writes the array @frames of 64 bit floating point numbers to the
+file. @frames must have a number of elements that is a multiple of the
+number of channels or an exception will be thrown.
+
+If the files isn't opened for writing or if it has been closed an error
+will occur.
+
+If the values are outside the range for a num64 then wrapping will occur.
+
+As of the time of the initial release, this may fail if the frame data was
+directly retrieved via L<read-double|#read-double> due to an infelicity in
+the runtime, this should be fixed at some point but can be worked around by
+copying the values.
+
+=head3 clone-info
+
+    method clone-info(Audio::Sndfile:D: ) returns Audio::Sndfile::Info
+
+This returns a new L<Audio::Sndfile::Info> based on the details of the current file
+suitable for being passed to L<new|#new> for instance when copying or converting the
+file.
 
 =end pod
 
@@ -143,7 +377,7 @@ class Audio::Sndfile {
     enum OpenMode (:Read(0x10), :Write(0x20), :ReadWrite(0x30));
 
     has Str  $.filename;
-    has File $!file handles <close error-number error>; 
+    has File $!file handles <close error-number error sync>; 
     has Audio::Sndfile::Info $.info handles <format channels samplerate frames sections seekable type sub-type endian duration>;
     has OpenMode $.mode;
 
