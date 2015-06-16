@@ -10,6 +10,28 @@ Audio::Sndfile - read/write audio data via libsndfile
 
 =begin code
 
+    # Convert file to 32 bit float WAV
+
+    use Audio::Sndfile;
+
+    my $in = Audio::Sndfile.new(filename => "t/data/cw_glitch_noise15.wav", :r);
+
+    my $out-format = Audio::Sndfile::Info::WAV +| Audio::Sndfile::Info::FLOAT;
+
+    my $out = Audio::Sndfile.new(filename   => "out.wav", :w,
+                                channels   => $in.channels,
+                                samplerate => $in.samplerate,
+                                format     => $out-format);
+
+    loop {
+	    my @in-frames = $in.read-float(1024);
+        $out.write-float(@in-frames);
+        last if ( @in-frames / $in.channels ) != 1024;
+    }
+
+    $in.close;
+    $out.close;
+
 =end code
 
 Other examples are available in the "examples" sub-directory of the
