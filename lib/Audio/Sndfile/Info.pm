@@ -48,6 +48,17 @@ An Int that describes the format of the file.  This is the bitwise or of C<type>
 and C<endian>.  It is required when opening a file for writing and providing a value that is
 not legal will result in an exception.
 
+=head3 samplerate
+
+This is the sample rate of the frame data in frames / second.  This is required when opening
+a file for writing.  It is important to note though that if data is being read from one file
+and written to the other (i.e. copying or format converting) then setting this to any other
+value than that of the incoming file will not cause an automatic sample rate conversion and will
+simply have the effect of slowing down or speeding up the playback of the written data.  If you
+want samplerate conversion you will either need to process the data yourself to add or remove
+the required frames (inferring the values in the up-sampling case,) or use some other library
+such as C<libsamplerate>.
+
 =head3 sections
 
 An Int that indicates the number of (format dependent) sections in the file.  This is not
