@@ -226,7 +226,7 @@ my @tests = (
 
 throws-like { my $obj = Audio::Sndfile.new(filename => "ook.wav", :w) }, "invalid format supplied to :w";
 
-for @tests -> $file {
+for @tests.pick(*) -> $file {
     my $basename = $file<filename>.IO.basename;
 
     my $obj = Audio::Sndfile.new(filename => $file<filename>, :r);
@@ -276,7 +276,7 @@ for @tests -> $file {
     my $float-name = $test-output.child("float-$basename");
     my $float-obj;
     lives-ok { $float-obj = Audio::Sndfile.new(filename => $float-name, info => $cinfo, :w) }, "open $float-name for writing";
-    todo("Bug with CArray[num32]", 8);
+    todo("Bug with CArray[num32] - see (https://rt.perl.org/Ticket/Display.html?id=125408)", 8);
     lives-ok { $i = $float-obj.write-float(@floats) }, "write-float";
     is($i, 100, "and it did write 100 frames");
     lives-ok { $float-obj.close }, "close that file to reopen";
@@ -291,7 +291,7 @@ for @tests -> $file {
     my $double-name = $test-output.child("double-$basename");
     my $double-obj;
     lives-ok { $double-obj = Audio::Sndfile.new(filename => $double-name, info => $cinfo, :w) }, "open $double-name for writing";
-    todo("Bug with CArray[num64]", 8);
+    todo("Bug with CArray[num64] - (see https://rt.perl.org/Ticket/Display.html?id=125408 )", 8);
     lives-ok { $i = $double-obj.write-double(@doubles) }, "write-double";
     is($i, 100, "and it did write 100 frames");
     lives-ok { $double-obj.close }, "close that file to reopen";

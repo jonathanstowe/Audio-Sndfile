@@ -321,6 +321,7 @@ class Audio::Sndfile {
         method !read-read(Int $frames, Audio::Sndfile::Info $info, &read-sub, Mu:U $type) returns Array {
 
             my @buff := CArray[$type].new;
+
             @buff[$frames * $info.channels] = 0;
 
             my $rc = &read-sub(self, @buff, $frames);
@@ -333,7 +334,9 @@ class Audio::Sndfile {
         method !write-write(Audio::Sndfile::Info $info, &write-sub, Mu:U $type, @items) returns Int {
 
             my @buff := CArray[$type].new;
-            @buff[$_] = @items[$_] for ^@items.elems;
+            for ^@items.elems -> $i {
+                @buff[$i] = @items[$i];
+            }
 
             my Int $frames = (@items.elems / $info.channels).Int;
             &write-sub(self, @buff, $frames);
@@ -367,7 +370,8 @@ class Audio::Sndfile {
         sub sf_readf_double(File , CArray[num64] is rw, int64) returns int64 is native('libsndfile') { * }
 
         method read-double(Int $frames, Audio::Sndfile::Info $info) returns Array {
-            self!read-read($frames, $info, &sf_readf_double, num64);
+            my @ret = self!read-read($frames, $info, &sf_readf_double, num64).map({Num.new($_)});
+            @ret;
         }
 
         sub sf_writef_double(File , CArray[num64], int64) returns int64 is native('libsndfile') { * }
@@ -379,7 +383,8 @@ class Audio::Sndfile {
         sub sf_readf_float(File , CArray[num32] is rw, int64) returns int64 is native('libsndfile') { * }
 
         method read-float(Int $frames, Audio::Sndfile::Info $info) returns Array {
-            self!read-read($frames, $info, &sf_readf_float, num32);
+            my @ret = self!read-read($frames, $info, &sf_readf_float, num32).map({Num.new($_)});
+            @ret;
         }
 
         sub sf_writef_float(File , CArray[num32], int64) returns int64 is native('libsndfile') { * }
