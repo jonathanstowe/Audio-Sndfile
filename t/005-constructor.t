@@ -33,8 +33,7 @@ lives-ok { $f.close() }, "close";
 
 lives-ok { $f = Audio::Sndfile.new(filename => 't/data/1second_16le_48000_2ch.wav', :r) }, "open another file";
 
-# this got missed when Test was kebabed
-is_approx($f.info.duration,1.002667,"and this file has a duration of approximately 1 second (it's actually 48124 frames long)");
+is-approx($f.info.duration,1.002667,"and this file has a duration of approximately 1 second (it's actually 48124 frames long)");
 
 # just a drive by here. If I've got it wrong this may completely kill moar
 is($f.read-short(10).elems, 20, "managed to read ten frames with read-short");
