@@ -201,15 +201,22 @@ to disk.  If the file was opened for reading it does nothing.
 
 =head3 read-short
 
-    method read-short(Audio::Sndfile:D: Int $frames) returns Array[int16]
+    multi method read-short(Audio::Sndfile:D: Int $frames) returns Array[int16]
+    multi method read-short(Audio::Sndfile:D: Int $frames, :$raw!) returns [CArray[int16], Int]
 
 This returns an array of size C<$frames> * $num-channels of 16 bit
 integers from the opened file.  The returned array may be empty or
 shorter than expected if there is no more data to read.
 
+With the the ':raw' adverb specified it will return a two element array containing the raw CArray
+returned from the underlying library and the number of frames.  This is for convenience
+(and efficiency ) where the data is going to be passed directly to another native libray
+function.
+
 =head3 write-short
 
-    method write-short(Audio::Sndfile:D: @frames) returns Int
+    multi method write-short(Audio::Sndfile:D: @frames) returns Int
+    multi method write-short(Audio::Sndfile:D: CArray[int16] $frames-in, Int $frames) returns Int
 
 This writes the array @frames of 16 bit integers to the file. @frames
 must have a number of elements that is a multiple of the number of
@@ -220,18 +227,27 @@ will occur.
 
 If the values are outside the range for an int16 then wrapping will occur.
 
+The second multi is for the convenience of applications which may have obtained their data
+from some native function.
 
 =head3 read-int
 
-    method read-int(Audio::Sndfile:D: Int $frames) returns Array[Int]
+    multi method read-int(Audio::Sndfile:D: Int $frames) returns Array[Int]
+    multi method read-int(Audio::Sndfile:D: Int $frames, :$raw!) returns [CArray[int32], Int]
 
 This returns an array of size C<$frames> * $num-channels of 32 bit
 integers from the opened file.  The returned array may be empty or
 shorter than expected if there is no more data to read.
 
+With the the ':raw' adverb specified it will return a two element array containing the raw CArray
+returned from the underlying library and the number of frames.  This is for convenience
+(and efficiency ) where the data is going to be passed directly to another native libray
+function.
+
 =head3 write-int
 
-    method write-int(Audio::Sndfile:D: @frames) returns Int
+    multi method write-int(Audio::Sndfile:D: @frames) returns Int
+    multi method write-int(Audio::Sndfile:D: CArray[int32] $frames-in, Int $frames) returns Int
 
 This writes the array @frames of 32 bit integers to the file. @frames
 must have a number of elements that is a multiple of the number of
@@ -242,17 +258,27 @@ will occur.
 
 If the values are outside the range for an int32 then wrapping will occur.
 
+The second multi is for the convenience of applications which may have obtained their data
+from some native function.
+
 =head3 read-float
 
-    method read-float(Audio::Sndfile:D: Int $frames) returns Array[num32]
+    multi method read-float(Audio::Sndfile:D: Int $frames) returns Array[num32]
+    multi method read-float(Audio::Sndfile:D: Int $frames, :$raw!) returns [CArray[num32], Int]
 
 This returns an array of size C<$frames> * $num-channels of 32 bit
 floating point numbers from the opened file.  The returned array may be
 empty or shorter than expected if there is no more data to read.
 
+With the the ':raw' adverb specified it will return a two element array containing the raw CArray
+returned from the underlying library and the number of frames.  This is for convenience
+(and efficiency ) where the data is going to be passed directly to another native libray
+function.
+
 =head3 write-float
 
-    method write-float(Audio::Sndfile:D: @frames) returns Int
+    multi method write-float(Audio::Sndfile:D: @frames) returns Int
+    multi method write-float(Audio::Sndfile:D: CArray[num32] $frames-in, Int $frames) returns Int
 
 This writes the array @frames of 32 bit floating point numbers to the
 file. @frames must have a number of elements that is a multiple of the
@@ -263,17 +289,27 @@ will occur.
 
 If the values are outside the range for a num32 then wrapping will occur.
 
+The second multi is for the convenience of applications which may have obtained their data
+from some native function.
+
 =head3 read-double
 
-    method read-double(Audio::Sndfile:D: Int $frames) returns Array[num64]
+    multi method read-double(Audio::Sndfile:D: Int $frames) returns Array[num64]
+    multi method read-double(Audio::Sndfile:D: Int $frames, :$raw!) returns [CArray[num64], Int]
 
 This returns an array of size C<$frames> * $num-channels of 64 bit
 floating point numbers from the opened file.  The returned array may be
 empty or shorter than expected if there is no more data to read.
 
+With the the ':raw' adverb specified it will return a two element array containing the raw CArray
+returned from the underlying library and the number of frames.  This is for convenience
+(and efficiency ) where the data is going to be passed directly to another native libray
+function.
+
 =head3 write-double
 
-    method write-double(Audio::Sndfile:D: @frames) returns Int
+    multi method write-double(Audio::Sndfile:D: @frames) returns Int
+    multi method write-double(Audio::Sndfile:D: CArray[num64] $frames-in, Int $frames) returns Int
 
 This writes the array @frames of 64 bit floating point numbers to the
 file. @frames must have a number of elements that is a multiple of the
@@ -288,6 +324,9 @@ As of the time of the initial release, this may fail if the frame data was
 directly retrieved via L<read-double|#read-double> due to an infelicity in
 the runtime, this should be fixed at some point but can be worked around by
 copying the values.
+
+The second multi is for the convenience of applications which may have obtained their data
+from some native function.
 
 =head3 clone-info
 
