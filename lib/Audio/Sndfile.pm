@@ -114,7 +114,8 @@ There are several accessors delegated to this object:
 
 =item format 
 
-The format of the file formed by the bitwise or of C<type>, C<sub-type> and C<endian>
+The format of the file formed by the bitwise or of C<type>, C<sub-type>
+and C<endian>
 
 =item channels 
 
@@ -126,38 +127,42 @@ The sample rate of the file as an Int (e.g. 44100, 48000).
 
 =item frames 
 
-The number of frames in the file.  This only makes sense when the file is opened
-for reading.
+The number of frames in the file.  This only makes sense when the file
+is opened for reading.
 
 =item sections 
 
 =item seekable 
 
-A Bool indicating whether the open file is seekable, this will be True for most
-regular files and False for special files such as a pipe, however as there currently
-isn't any easy way to open other than a regular file this may not be useful.
+A Bool indicating whether the open file is seekable, this will be True
+for most regular files and False for special files such as a pipe,
+however as there currently isn't any easy way to open other than a
+regular file this may not be useful.
 
 =item type 
 
-A value of the enum L<Audio::Sndfile::Info::Format> indicating the major format of the
-file (e.g. WAV,) this is bitwise or-ed with the C<sub-type> and C<endian> to create
-C<format> (which is what is used by the underlying library functions.)
+A value of the enum L<Audio::Sndfile::Info::Format> indicating the major
+format of the file (e.g. WAV,) this is bitwise or-ed with the C<sub-type>
+and C<endian> to create C<format> (which is what is used by the underlying
+library functions.)
 
 =item sub-type 
 
-A value of the enum L<Audio::Sndfile::Info::Subformat> indicating the minor format or
-sample encoding of the file (e.g PCM_16, FLOAT, ) this is bitwise or-ed with the C<type>
-and C<endian> to create C<format>
+A value of the enum L<Audio::Sndfile::Info::Subformat> indicating the
+minor format or sample encoding of the file (e.g PCM_16, FLOAT, ) this
+is bitwise or-ed with the C<type> and C<endian> to create C<format>
 
 =item endian 
 
-A value of the enum L<Audio::Sndfile::Info::End> that indicate the endian-ness of the
-sample data.  This is bitwise or-ed with C<type> and C<sub-type> to provide C<format>.
+A value of the enum L<Audio::Sndfile::Info::End> that indicate the
+endian-ness of the sample data.  This is bitwise or-ed with C<type>
+and C<sub-type> to provide C<format>.
 
 =item duration
 
-A L<Duration> object that describes the duration of the file in (possibly fractional) seconds.
-This probably only makes sense for files opened for reading.
+A L<Duration> object that describes the duration of the file in (possibly
+fractional) seconds.  This probably only makes sense for files opened
+for reading.
 
 =head3 library-version
 
@@ -242,8 +247,8 @@ If the values are outside the range for an int32 then wrapping will occur.
     method read-float(Audio::Sndfile:D: Int $frames) returns Array[num32]
 
 This returns an array of size C<$frames> * $num-channels of 32 bit
-floating point numbers from the opened file.  The returned array may be empty or
-shorter than expected if there is no more data to read.
+floating point numbers from the opened file.  The returned array may be
+empty or shorter than expected if there is no more data to read.
 
 =head3 write-float
 
@@ -263,8 +268,8 @@ If the values are outside the range for a num32 then wrapping will occur.
     method read-double(Audio::Sndfile:D: Int $frames) returns Array[num64]
 
 This returns an array of size C<$frames> * $num-channels of 64 bit
-floating point numbers from the opened file.  The returned array may be empty or
-shorter than expected if there is no more data to read.
+floating point numbers from the opened file.  The returned array may be
+empty or shorter than expected if there is no more data to read.
 
 =head3 write-double
 
@@ -288,13 +293,15 @@ copying the values.
 
     method clone-info(Audio::Sndfile:D: ) returns Audio::Sndfile::Info
 
-This returns a new L<Audio::Sndfile::Info> based on the details of the current file
-suitable for being passed to L<new|#new> for instance when copying or converting the
-file.
+This returns a new L<Audio::Sndfile::Info> based on the details of the
+current file suitable for being passed to L<new|#new> for instance when
+copying or converting the file.
 
 =end pod
 
-class Audio::Sndfile {
+class Audio::Sndfile:ver<v0.0.2>:auth<github:jonathanstowe> {
+
+    subset RawEncode of Array where  ($_.elems == 2 ) && ($_[0] ~~ CArray) && ($_[1] ~~ Int);
 
     use Audio::Sndfile::Info;
 
@@ -318,15 +325,21 @@ class Audio::Sndfile {
             sf_strerror(self);
         }
 
-        method !read-read(Int $frames, Audio::Sndfile::Info $info, &read-sub, Mu:U $type) returns Array {
+        multi method read-read(Int $frames, Audio::Sndfile::Info $info, &read-sub, Mu:U $type, :$raw!) returns RawEncode {
 
-            my @buff := CArray[$type].new;
+            my $buff = CArray[$type].new;
 
-            @buff[$frames * $info.channels] = 0;
+            $buff[$frames * $info.channels] = 0;
 
-            my $rc = &read-sub(self, @buff, $frames);
+            my $rc = &read-sub(self, $buff, $frames);
 
-            my @tmp_arr =  (^($rc * $info.channels)).map({ @buff[$_] });
+            [ $buff, $rc ];
+        }
+
+        multi method read-read(Int $frames, Audio::Sndfile::Info $info, &read-sub, Mu:U $type ) returns Array {
+
+            my ($buff, $rc ) =  self.read-read($frames, $info, &read-sub, $type, :raw).list;
+            my @tmp_arr =  (^($rc * $info.channels)).map({ $buff[$_] });
             
             @tmp_arr;
         }
@@ -345,8 +358,11 @@ class Audio::Sndfile {
         sub sf_readf_short(File , CArray[int16] is rw, int64) returns int64 is native('libsndfile') { * }
 
 
-        method read-short(Int $frames, Audio::Sndfile::Info $info) returns Array {
-            self!read-read($frames, $info, &sf_readf_short, int16);
+        multi method read-short(Int $frames, Audio::Sndfile::Info $info) returns Array {
+            self.read-read($frames, $info, &sf_readf_short, int16);
+        }
+        multi method read-short(Int $frames, Audio::Sndfile::Info $info, :$raw!) returns RawEncode {
+            self.read-read($frames, $info, &sf_readf_short, int16, :raw);
         }
 
         sub sf_writef_short(File , CArray[int16], int64) returns int64 is native('libsndfile') { * }
@@ -357,8 +373,11 @@ class Audio::Sndfile {
 
         sub sf_readf_int(File , CArray[int32], int64) returns int64 is native('libsndfile') { * }
 
-        method read-int(Int $frames, Audio::Sndfile::Info $info) returns Array {
-            self!read-read($frames, $info, &sf_readf_int, int32);
+        multi method read-int(Int $frames, Audio::Sndfile::Info $info) returns Array {
+            self.read-read($frames, $info, &sf_readf_int, int32);
+        }
+        multi method read-int(Int $frames, Audio::Sndfile::Info $info, :$raw!) returns RawEncode {
+            self.read-read($frames, $info, &sf_readf_int, int32, :raw);
         }
 
         sub sf_writef_int(File , CArray[int32], int64) returns int64 is native('libsndfile') { * }
@@ -369,9 +388,12 @@ class Audio::Sndfile {
 
         sub sf_readf_double(File , CArray[num64] is rw, int64) returns int64 is native('libsndfile') { * }
 
-        method read-double(Int $frames, Audio::Sndfile::Info $info) returns Array {
-            my @ret = self!read-read($frames, $info, &sf_readf_double, num64).map({Num.new($_)});
-            @ret;
+        multi method read-double(Int $frames, Audio::Sndfile::Info $info) returns Array {
+            self.read-read($frames, $info, &sf_readf_double, num64);
+        }
+
+        multi method read-double(Int $frames, Audio::Sndfile::Info $info, :$raw!) returns RawEncode {
+            self.read-read($frames, $info, &sf_readf_double, num64, :raw);
         }
 
         sub sf_writef_double(File , CArray[num64], int64) returns int64 is native('libsndfile') { * }
@@ -382,9 +404,11 @@ class Audio::Sndfile {
 
         sub sf_readf_float(File , CArray[num32] is rw, int64) returns int64 is native('libsndfile') { * }
 
-        method read-float(Int $frames, Audio::Sndfile::Info $info) returns Array {
-            my @ret = self!read-read($frames, $info, &sf_readf_float, num32).map({Num.new($_)});
-            @ret;
+        multi method read-float(Int $frames, Audio::Sndfile::Info $info) returns Array {
+            self.read-read($frames, $info, &sf_readf_float, num32);
+        }
+        multi method read-float(Int $frames, Audio::Sndfile::Info $info, :$raw!) returns RawEncode {
+            self.read-read($frames, $info, &sf_readf_float, num32, :raw);
         }
 
         sub sf_writef_float(File , CArray[num32], int64) returns int64 is native('libsndfile') { * }
@@ -444,8 +468,11 @@ class Audio::Sndfile {
         }
     }
 
-    method read-short(Int $frames) returns Array {
+    multi method read-short(Int $frames) returns Array {
         $!file.read-short($frames, $!info);
+    }
+    multi method read-short(Int $frames, :$raw!) returns RawEncode {
+        $!file.read-short($frames, $!info, :raw);
     }
 
     method write-short(@frames) returns Int {
@@ -453,8 +480,11 @@ class Audio::Sndfile {
         $!file.write-short($!info, @frames);
     }
 
-    method read-int(Int $frames) returns Array {
+    multi method read-int(Int $frames) returns Array {
         $!file.read-int($frames, $!info);
+    }
+    multi method read-int(Int $frames, :$raw!) returns RawEncode {
+        $!file.read-int($frames, $!info, :raw);
     }
         
     method write-int(@frames) returns Int {
@@ -462,8 +492,11 @@ class Audio::Sndfile {
         $!file.write-int($!info, @frames);
     }
 
-    method read-float(Int $frames) returns Array {
+    multi method read-float(Int $frames) returns Array {
         $!file.read-float($frames, $!info);
+    }
+    multi method read-float(Int $frames, :$raw!) returns RawEncode {
+        $!file.read-float($frames, $!info, :raw);
     }
         
     method write-float(@frames) returns Int {
@@ -471,8 +504,11 @@ class Audio::Sndfile {
         $!file.write-float($!info, @frames);
     }
 
-    method read-double(Int $frames) returns Array {
+    multi method read-double(Int $frames) returns Array {
         $!file.read-double($frames, $!info);
+    }
+    multi method read-double(Int $frames, :$raw!) returns RawEncode {
+        $!file.read-double($frames, $!info, :raw);
     }
 
     method write-double(@frames) returns Int {
