@@ -344,15 +344,18 @@ class Audio::Sndfile:ver<v0.0.2>:auth<github:jonathanstowe> {
             @tmp_arr;
         }
 
-        method !write-write(Audio::Sndfile::Info $info, &write-sub, Mu:U $type, @items) returns Int {
+        multi method write-write(Audio::Sndfile::Info $info, &write-sub, Mu:U $type, @items) returns Int {
 
-            my @buff := CArray[$type].new;
+            my $buff = CArray[$type].new;
             for ^@items.elems -> $i {
-                @buff[$i] = @items[$i];
+                $buff[$i] = @items[$i];
             }
-
             my Int $frames = (@items.elems / $info.channels).Int;
-            &write-sub(self, @buff, $frames);
+            self.write-write(&write-sub, $buff, $frames);
+        }
+
+        multi method write-write(&write-sub, CArray $frames-in, Int $frames ) returns Int {
+            &write-sub(self, $frames-in, $frames);
         }
 
         sub sf_readf_short(File , CArray[int16] is rw, int64) returns int64 is native('libsndfile') { * }
@@ -367,8 +370,11 @@ class Audio::Sndfile:ver<v0.0.2>:auth<github:jonathanstowe> {
 
         sub sf_writef_short(File , CArray[int16], int64) returns int64 is native('libsndfile') { * }
 
-        method write-short(Audio::Sndfile::Info $info, @items ) returns Int {
-            self!write-write($info, &sf_writef_short, int16, @items);
+        multi method write-short(Audio::Sndfile::Info $info, @items ) returns Int {
+            self.write-write($info, &sf_writef_short, int16, @items);
+        }
+        multi method write-short(CArray[int16] $frames-in, Int $frames  ) returns Int {
+            self.write-write(&sf_writef_short, $frames-in, $frames);
         }
 
         sub sf_readf_int(File , CArray[int32], int64) returns int64 is native('libsndfile') { * }
@@ -382,8 +388,11 @@ class Audio::Sndfile:ver<v0.0.2>:auth<github:jonathanstowe> {
 
         sub sf_writef_int(File , CArray[int32], int64) returns int64 is native('libsndfile') { * }
 
-        method write-int(Audio::Sndfile::Info $info, @items ) returns Int {
-            self!write-write($info, &sf_writef_int, int32, @items);
+        multi method write-int(Audio::Sndfile::Info $info, @items ) returns Int {
+            self.write-write($info, &sf_writef_int, int32, @items);
+        }
+        multi method write-int(CArray[int32] $frames-in, Int $frames) returns Int {
+            self.write-write(&sf_writef_int, $frames-in, $frames);
         }
 
         sub sf_readf_double(File , CArray[num64] is rw, int64) returns int64 is native('libsndfile') { * }
@@ -398,8 +407,11 @@ class Audio::Sndfile:ver<v0.0.2>:auth<github:jonathanstowe> {
 
         sub sf_writef_double(File , CArray[num64], int64) returns int64 is native('libsndfile') { * }
 
-        method write-double(Audio::Sndfile::Info $info, @items ) returns Int {
-            self!write-write($info, &sf_writef_double, num64, @items);
+        multi method write-double(Audio::Sndfile::Info $info, @items ) returns Int {
+            self.write-write($info, &sf_writef_double, num64, @items);
+        }
+        multi method write-double(CArray[num64] $frames-in, Int $frames) returns Int {
+            self.write-write(&sf_writef_double, $frames-in, $frames);
         }
 
         sub sf_readf_float(File , CArray[num32] is rw, int64) returns int64 is native('libsndfile') { * }
@@ -413,8 +425,11 @@ class Audio::Sndfile:ver<v0.0.2>:auth<github:jonathanstowe> {
 
         sub sf_writef_float(File , CArray[num32], int64) returns int64 is native('libsndfile') { * }
 
-        method write-float(Audio::Sndfile::Info $info, @items ) returns Int {
-            self!write-write($info, &sf_writef_float, num32, @items);
+        multi method write-float(Audio::Sndfile::Info $info, @items ) returns Int {
+            self.write-write($info, &sf_writef_float, num32, @items);
+        }
+        multi method write-float(CArray[num32] $frames-in, Int $frames) returns Int {
+            self.write-write(&sf_writef_float, $frames-in, $frames);
         }
 
         sub sf_write_sync(File) is native('libsndfile') { * }
@@ -475,9 +490,12 @@ class Audio::Sndfile:ver<v0.0.2>:auth<github:jonathanstowe> {
         $!file.read-short($frames, $!info, :raw);
     }
 
-    method write-short(@frames) returns Int {
+    multi method write-short(@frames) returns Int {
         self!assert-frame-length(@frames);
         $!file.write-short($!info, @frames);
+    }
+    multi method write-short(CArray[int16] $frames-in, Int $frames) returns Int {
+        $!file.write-short($frames-in, $frames);
     }
 
     multi method read-int(Int $frames) returns Array {
@@ -487,9 +505,12 @@ class Audio::Sndfile:ver<v0.0.2>:auth<github:jonathanstowe> {
         $!file.read-int($frames, $!info, :raw);
     }
         
-    method write-int(@frames) returns Int {
+    multi method write-int(@frames) returns Int {
         self!assert-frame-length(@frames);
         $!file.write-int($!info, @frames);
+    }
+    multi method write-int(CArray[int32] $frames-in, Int $frames) returns Int {
+        $!file.write-int($frames-in, $frames);
     }
 
     multi method read-float(Int $frames) returns Array {
@@ -499,9 +520,12 @@ class Audio::Sndfile:ver<v0.0.2>:auth<github:jonathanstowe> {
         $!file.read-float($frames, $!info, :raw);
     }
         
-    method write-float(@frames) returns Int {
+    multi method write-float(@frames) returns Int {
         self!assert-frame-length(@frames);
         $!file.write-float($!info, @frames);
+    }
+    multi method write-float(CArray[num32] $frames-in, Int $frames) returns Int {
+        $!file.write-float($frames-in, $frames);
     }
 
     multi method read-double(Int $frames) returns Array {
@@ -511,9 +535,12 @@ class Audio::Sndfile:ver<v0.0.2>:auth<github:jonathanstowe> {
         $!file.read-double($frames, $!info, :raw);
     }
 
-    method write-double(@frames) returns Int {
+    multi method write-double(@frames) returns Int {
         self!assert-frame-length(@frames);
         $!file.write-double($!info, @frames);
+    }
+    multi method write-double(CArray[num64] $frames-in, Int $frames) returns Int {
+        $!file.write-double($frames-in, $frames);
     }
 
     method !assert-frame-length(@frames) {
