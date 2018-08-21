@@ -512,7 +512,6 @@ class Audio::Sndfile:ver<0.0.11>:auth<github:jonathanstowe> {
 
             $!info //= Audio::Sndfile::Info.new();
 
-            explicitly-manage($!filename);
             $!file = sf_open($!filename, $!mode.Int, $!info);
 
             if $!file.error-number > 0 {
