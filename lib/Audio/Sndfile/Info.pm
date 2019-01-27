@@ -344,7 +344,7 @@ class Audio::Sndfile::Info:ver<0.0.12>:auth<github:jonathanstowe> is repr('CStru
     has int32     $.sections;
     has int32     $._seekable;
 
-    sub  sf_format_check(Audio::Sndfile::Info $info) returns int32 is native('sndfile',v1) { * }
+    sub  sf_format_check(Audio::Sndfile::Info $info --> int32 ) is native('sndfile',v1) { * }
 
     # Masks to get at the parts of format
     constant SUBMASK    = 0x0000FFFF;
@@ -409,27 +409,27 @@ class Audio::Sndfile::Info:ver<0.0.12>:auth<github:jonathanstowe> is repr('CStru
         :DPCM_16(0x0051),
         :VORBIS(0x0060)
     );
-    method format-check() returns Bool {
-        sf_format_check(self) == 1 ?? True !! False;
+    method format-check( --> Bool ) {
+        sf_format_check(self) == 1;
     }
 
-    method seekable() returns Bool {
-        $!_seekable == 1 ?? True !! False;
+    method seekable( --> Bool ) {
+        $!_seekable == 1;
     }
 
-    method type() returns Format {
+    method type( --> Format ) {
         Format($!format +& TYPEMASK);
     }
 
-    method sub-type() returns Subformat {
+    method sub-type( --> Subformat ) {
         Subformat($!format +& SUBMASK);
     }
 
-    method endian() returns End {
+    method endian( --> End ) {
         End($!format +& ENDMASK);
     }
 
-    method duration() returns Duration {
+    method duration(--> Duration ) {
         Duration.new($!frames/$!samplerate);
     }
 }

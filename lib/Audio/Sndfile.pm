@@ -349,35 +349,31 @@ class Audio::Sndfile:ver<0.0.12>:auth<github:jonathanstowe> {
     # The opaque type returned from open
     my class File is repr('CPointer') {
 
-        sub sf_close(File $file) returns int32 is native('sndfile',v1) { * }
+        sub sf_close(File $file --> int32 ) is native('sndfile',v1) { * }
 
-        method close() {
+        method close( --> Int ) {
             sf_close(self);
         }
 
-        sub sf_error(File $file) returns int32 is native('sndfile',v1) { * }
+        sub sf_error(File $file --> int32 ) is native('sndfile',v1) { * }
 
-        method error-number() {
+        method error-number( --> Int ) {
             sf_error(self);
         }
-        sub sf_strerror(File $file) returns Str is native('sndfile',v1) { * }
+        sub sf_strerror(File $file --> Str ) is native('sndfile',v1) { * }
 
-        method error() {
+        method error( --> Str ) {
             sf_strerror(self);
         }
 
-        multi method read-read(Int $frames, Audio::Sndfile::Info $info, &read-sub, Mu:U $type, :$raw!) returns RawEncode {
-
+        multi method read-read(Int $frames, Audio::Sndfile::Info $info, &read-sub, Mu:U $type, :$raw! --> RawEncode ) {
             my $buff = CArray[$type].new;
-
             $buff[$frames * $info.channels] = $type ~~ Num ?? Num(0) !! Int(0);
-
             my $rc = &read-sub(self, $buff, $frames);
-
             [ $buff, $rc ];
         }
 
-        multi method read-read(Int $frames, Audio::Sndfile::Info $info, &read-sub, Mu:U $type ) returns Array {
+        multi method read-read(Int $frames, Audio::Sndfile::Info $info, &read-sub, Mu:U $type --> Array ) {
 
             my ($buff, $rc ) =  self.read-read($frames, $info, &read-sub, $type, :raw).list;
             my @tmp_arr =  (^($rc * $info.channels)).map({ $buff[$_] });
@@ -385,7 +381,7 @@ class Audio::Sndfile:ver<0.0.12>:auth<github:jonathanstowe> {
             @tmp_arr;
         }
 
-        multi method write-write(Audio::Sndfile::Info $info, &write-sub, Mu:U $type, @items) returns Int {
+        multi method write-write(Audio::Sndfile::Info $info, &write-sub, Mu:U $type, @items --> Int ) {
 
             my $buff = CArray[$type].new;
             for ^@items.elems -> $i {
@@ -395,81 +391,81 @@ class Audio::Sndfile:ver<0.0.12>:auth<github:jonathanstowe> {
             self.write-write(&write-sub, $buff, $frames);
         }
 
-        multi method write-write(&write-sub, CArray $frames-in, Int $frames ) returns Int {
+        multi method write-write(&write-sub, CArray $frames-in, Int $frames  --> Int ) {
             &write-sub(self, $frames-in, $frames);
         }
 
-        sub sf_readf_short(File , CArray[int16] is rw, int64) returns int64 is native('sndfile',v1) { * }
+        sub sf_readf_short(File , CArray[int16] is rw, int64 --> int64 ) is native('sndfile',v1) { * }
 
 
-        multi method read-short(Int $frames, Audio::Sndfile::Info $info) returns Array {
+        multi method read-short(Int $frames, Audio::Sndfile::Info $info --> Array ) {
             self.read-read($frames, $info, &sf_readf_short, int16);
         }
-        multi method read-short(Int $frames, Audio::Sndfile::Info $info, :$raw!) returns RawEncode {
+        multi method read-short(Int $frames, Audio::Sndfile::Info $info, :$raw! --> RawEncode ) {
             self.read-read($frames, $info, &sf_readf_short, int16, :raw);
         }
 
-        sub sf_writef_short(File , CArray[int16], int64) returns int64 is native('sndfile',v1) { * }
+        sub sf_writef_short(File , CArray[int16], int64 --> int64 ) is native('sndfile',v1) { * }
 
-        multi method write-short(Audio::Sndfile::Info $info, @items ) returns Int {
+        multi method write-short(Audio::Sndfile::Info $info, @items --> Int ) {
             self.write-write($info, &sf_writef_short, int16, @items);
         }
-        multi method write-short(CArray[int16] $frames-in, Int $frames  ) returns Int {
+        multi method write-short(CArray[int16] $frames-in, Int $frames  --> Int ) {
             self.write-write(&sf_writef_short, $frames-in, $frames);
         }
 
-        sub sf_readf_int(File , CArray[int32], int64) returns int64 is native('sndfile',v1) { * }
+        sub sf_readf_int(File , CArray[int32], int64 --> int64 ) is native('sndfile',v1) { * }
 
-        multi method read-int(Int $frames, Audio::Sndfile::Info $info) returns Array {
+        multi method read-int(Int $frames, Audio::Sndfile::Info $info --> Array ) {
             self.read-read($frames, $info, &sf_readf_int, int32);
         }
-        multi method read-int(Int $frames, Audio::Sndfile::Info $info, :$raw!) returns RawEncode {
+        multi method read-int(Int $frames, Audio::Sndfile::Info $info, :$raw! --> RawEncode ) {
             self.read-read($frames, $info, &sf_readf_int, int32, :raw);
         }
 
-        sub sf_writef_int(File , CArray[int32], int64) returns int64 is native('sndfile',v1) { * }
+        sub sf_writef_int(File , CArray[int32], int64 --> int64 ) is native('sndfile',v1) { * }
 
-        multi method write-int(Audio::Sndfile::Info $info, @items ) returns Int {
+        multi method write-int(Audio::Sndfile::Info $info, @items  --> Int ) {
             self.write-write($info, &sf_writef_int, int32, @items);
         }
-        multi method write-int(CArray[int32] $frames-in, Int $frames) returns Int {
+        multi method write-int(CArray[int32] $frames-in, Int $frames --> Int ) {
             self.write-write(&sf_writef_int, $frames-in, $frames);
         }
 
-        sub sf_readf_double(File , CArray[num64] is rw, int64) returns int64 is native('sndfile',v1) { * }
+        sub sf_readf_double(File , CArray[num64] is rw, int64 --> int64 ) is native('sndfile',v1) { * }
 
-        multi method read-double(Int $frames, Audio::Sndfile::Info $info) returns Array {
+        multi method read-double(Int $frames, Audio::Sndfile::Info $info --> Array ) {
             self.read-read($frames, $info, &sf_readf_double, num64);
         }
 
-        multi method read-double(Int $frames, Audio::Sndfile::Info $info, :$raw!) returns RawEncode {
+        multi method read-double(Int $frames, Audio::Sndfile::Info $info, :$raw! --> RawEncode ) {
             self.read-read($frames, $info, &sf_readf_double, num64, :raw);
         }
 
-        sub sf_writef_double(File , CArray[num64], int64) returns int64 is native('sndfile',v1) { * }
+        sub sf_writef_double(File , CArray[num64], int64 --> int64 ) is native('sndfile',v1) { * }
 
-        multi method write-double(Audio::Sndfile::Info $info, @items ) returns Int {
+        multi method write-double(Audio::Sndfile::Info $info, @items --> Int ) {
             self.write-write($info, &sf_writef_double, num64, @items);
         }
-        multi method write-double(CArray[num64] $frames-in, Int $frames) returns Int {
+        multi method write-double(CArray[num64] $frames-in, Int $frames --> Int ) {
             self.write-write(&sf_writef_double, $frames-in, $frames);
         }
 
-        sub sf_readf_float(File , CArray[num32] is rw, int64) returns int64 is native('sndfile',v1) { * }
+        sub sf_readf_float(File , CArray[num32] is rw, int64 --> int64 ) is native('sndfile',v1) { * }
 
-        multi method read-float(Int $frames, Audio::Sndfile::Info $info) returns Array {
+        multi method read-float(Int $frames, Audio::Sndfile::Info $info --> Array ) {
             self.read-read($frames, $info, &sf_readf_float, num32);
         }
-        multi method read-float(Int $frames, Audio::Sndfile::Info $info, :$raw!) returns RawEncode {
+        multi method read-float(Int $frames, Audio::Sndfile::Info $info, :$raw! --> RawEncode ) {
             self.read-read($frames, $info, &sf_readf_float, num32, :raw);
         }
 
-        sub sf_writef_float(File , CArray[num32], int64) returns int64 is native('sndfile',v1) { * }
+        sub sf_writef_float(File , CArray[num32], int64 --> int64 ) is native('sndfile',v1) { * }
 
-        multi method write-float(Audio::Sndfile::Info $info, @items ) returns Int {
+        multi method write-float(Audio::Sndfile::Info $info, @items --> Int ) {
             self.write-write($info, &sf_writef_float, num32, @items);
         }
-        multi method write-float(CArray[num32] $frames-in, Int $frames) returns Int {
+        multi method write-float(CArray[num32] $frames-in, Int $frames --> Int ) {
             self.write-write(&sf_writef_float, $frames-in, $frames);
         }
 
@@ -488,13 +484,13 @@ class Audio::Sndfile:ver<0.0.12>:auth<github:jonathanstowe> {
     has Audio::Sndfile::Info $.info handles <format channels samplerate frames sections seekable type sub-type endian duration>;
     has OpenMode $.mode;
 
-    sub sf_version_string() returns Str is native('sndfile',v1) { * }
+    sub sf_version_string( --> Str ) is native('sndfile',v1) { * }
 
-    method library-version() returns Str {
+    method library-version(--> Str ) {
         sf_version_string();
     }
 
-    sub sf_open(Str $filename, int32 $mode, Audio::Sndfile::Info $info) returns File is native('sndfile',v1) { * }
+    sub sf_open(Str $filename, int32 $mode, Audio::Sndfile::Info $info --> File ) is native('sndfile',v1) { * }
 
     submethod BUILD(Str() :$!filename!, Bool :$r, Bool :$w, Bool :$rw, Audio::Sndfile::Info :$!info?,  *%info) {
         if one($r, $w, $rw ) {
@@ -523,63 +519,63 @@ class Audio::Sndfile:ver<0.0.12>:auth<github:jonathanstowe> {
         }
     }
 
-    multi method read-short(Int $frames) returns Array {
+    multi method read-short(Int $frames --> Array ) {
         $!file.read-short($frames, $!info);
     }
-    multi method read-short(Int $frames, :$raw!) returns RawEncode {
+    multi method read-short(Int $frames, :$raw! --> RawEncode ) {
         $!file.read-short($frames, $!info, :raw);
     }
 
-    multi method write-short(@frames) returns Int {
+    multi method write-short(@frames --> Int ) {
         self!assert-frame-length(@frames);
         $!file.write-short($!info, @frames);
     }
-    multi method write-short(CArray[int16] $frames-in, Int $frames) returns Int {
+    multi method write-short(CArray[int16] $frames-in, Int $frames --> Int ) {
         $!file.write-short($frames-in, $frames);
     }
 
-    multi method read-int(Int $frames) returns Array {
+    multi method read-int(Int $frames --> Array ) {
         $!file.read-int($frames, $!info);
     }
-    multi method read-int(Int $frames, :$raw!) returns RawEncode {
+    multi method read-int(Int $frames, :$raw! --> RawEncode ) {
         $!file.read-int($frames, $!info, :raw);
     }
         
-    multi method write-int(@frames) returns Int {
+    multi method write-int(@frames --> Int ) {
         self!assert-frame-length(@frames);
         $!file.write-int($!info, @frames);
     }
-    multi method write-int(CArray[int32] $frames-in, Int $frames) returns Int {
+    multi method write-int(CArray[int32] $frames-in, Int $frames --> Int ) {
         $!file.write-int($frames-in, $frames);
     }
 
-    multi method read-float(Int $frames) returns Array {
+    multi method read-float(Int $frames --> Array ) {
         $!file.read-float($frames, $!info);
     }
-    multi method read-float(Int $frames, :$raw!) returns RawEncode {
+    multi method read-float(Int $frames, :$raw! --> RawEncode ) {
         $!file.read-float($frames, $!info, :raw);
     }
         
-    multi method write-float(@frames) returns Int {
+    multi method write-float(@frames --> Int ) {
         self!assert-frame-length(@frames);
         $!file.write-float($!info, @frames);
     }
-    multi method write-float(CArray[num32] $frames-in, Int $frames) returns Int {
+    multi method write-float(CArray[num32] $frames-in, Int $frames --> Int ) {
         $!file.write-float($frames-in, $frames);
     }
 
-    multi method read-double(Int $frames) returns Array {
+    multi method read-double(Int $frames --> Array ) {
         $!file.read-double($frames, $!info);
     }
-    multi method read-double(Int $frames, :$raw!) returns RawEncode {
+    multi method read-double(Int $frames, :$raw! --> RawEncode ) {
         $!file.read-double($frames, $!info, :raw);
     }
 
-    multi method write-double(@frames) returns Int {
+    multi method write-double(@frames --> Int ) {
         self!assert-frame-length(@frames);
         $!file.write-double($!info, @frames);
     }
-    multi method write-double(CArray[num64] $frames-in, Int $frames) returns Int {
+    multi method write-double(CArray[num64] $frames-in, Int $frames --> Int ) {
         $!file.write-double($frames-in, $frames);
     }
 
@@ -590,7 +586,7 @@ class Audio::Sndfile:ver<0.0.12>:auth<github:jonathanstowe> {
     }
 
     # minimum detail required
-    method clone-info() {
+    method clone-info( --> Audio::Sndfile::Info ) {
         Audio::Sndfile::Info.new(
                                     samplerate  => $!info.samplerate,
                                     channels    => $!info.channels,
@@ -598,10 +594,9 @@ class Audio::Sndfile:ver<0.0.12>:auth<github:jonathanstowe> {
                                 );
     }
 
-    method Numeric() {
+    method Numeric( --> Numeric ) {
         $!info.type;
     }
-
 }
 
 
