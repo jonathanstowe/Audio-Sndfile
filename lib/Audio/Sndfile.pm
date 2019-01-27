@@ -340,7 +340,7 @@ copying or converting the file.
 
 =end pod
 
-class Audio::Sndfile:ver<0.0.12>:auth<github:jonathanstowe> {
+class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
 
     subset RawEncode of Array where  ($_.elems == 2 ) && ($_[0] ~~ CArray) && ($_[1] ~~ Int);
 
