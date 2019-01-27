@@ -2,7 +2,6 @@
 
 use v6;
 use Test;
-use lib 'lib';
 
 use-ok('Audio::Sndfile', 'Can use Audio::Sndfile');
 use-ok('Audio::Sndfile::Info', 'Can use Audio::Sndfile::Info');

@@ -1,4 +1,5 @@
-use v6.c;
+use v6;
+
 use NativeCall;
 
 =begin pod

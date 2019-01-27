@@ -6,7 +6,7 @@
 	"bugtracker" : "https://github.com/jonathanstowe/Audio-Sndfile/issues",
 	"email" : "jns+git@gellyfish.co.uk"
   },
-  "perl": "6.c",
+  "perl": "6.*",
   "resources": [
     
   ],

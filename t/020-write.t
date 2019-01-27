@@ -1,7 +1,9 @@
 #!perl6
 
-use v6.c;
+use v6;
+
 use Test;
+
 plan 862;
 
 use Shell::Command;
