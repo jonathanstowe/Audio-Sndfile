@@ -342,6 +342,8 @@ copying or converting the file.
 
 class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
 
+    my constant LIB = [ 'sndfile', v1 ];
+
     subset RawEncode of Array where  ($_.elems == 2 ) && ($_[0] ~~ CArray) && ($_[1] ~~ Int);
 
     use Audio::Sndfile::Info;
@@ -349,18 +351,18 @@ class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
     # The opaque type returned from open
     my class File is repr('CPointer') {
 
-        sub sf_close(File $file --> int32 ) is native('sndfile',v1) { * }
+        sub sf_close(File $file --> int32 ) is native(LIB) { * }
 
         method close( --> Int ) {
             sf_close(self);
         }
 
-        sub sf_error(File $file --> int32 ) is native('sndfile',v1) { * }
+        sub sf_error(File $file --> int32 ) is native(LIB) { * }
 
         method error-number( --> Int ) {
             sf_error(self);
         }
-        sub sf_strerror(File $file --> Str ) is native('sndfile',v1) { * }
+        sub sf_strerror(File $file --> Str ) is native(LIB) { * }
 
         method error( --> Str ) {
             sf_strerror(self);
@@ -395,7 +397,7 @@ class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
             &write-sub(self, $frames-in, $frames);
         }
 
-        sub sf_readf_short(File , CArray[int16] is rw, int64 --> int64 ) is native('sndfile',v1) { * }
+        sub sf_readf_short(File , CArray[int16] is rw, int64 --> int64 ) is native(LIB) { * }
 
 
         multi method read-short(Int $frames, Audio::Sndfile::Info $info --> Array ) {
@@ -405,7 +407,7 @@ class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
             self.read-read($frames, $info, &sf_readf_short, int16, :raw);
         }
 
-        sub sf_writef_short(File , CArray[int16], int64 --> int64 ) is native('sndfile',v1) { * }
+        sub sf_writef_short(File , CArray[int16], int64 --> int64 ) is native(LIB) { * }
 
         multi method write-short(Audio::Sndfile::Info $info, @items --> Int ) {
             self.write-write($info, &sf_writef_short, int16, @items);
@@ -414,7 +416,7 @@ class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
             self.write-write(&sf_writef_short, $frames-in, $frames);
         }
 
-        sub sf_readf_int(File , CArray[int32], int64 --> int64 ) is native('sndfile',v1) { * }
+        sub sf_readf_int(File , CArray[int32], int64 --> int64 ) is native(LIB) { * }
 
         multi method read-int(Int $frames, Audio::Sndfile::Info $info --> Array ) {
             self.read-read($frames, $info, &sf_readf_int, int32);
@@ -423,7 +425,7 @@ class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
             self.read-read($frames, $info, &sf_readf_int, int32, :raw);
         }
 
-        sub sf_writef_int(File , CArray[int32], int64 --> int64 ) is native('sndfile',v1) { * }
+        sub sf_writef_int(File , CArray[int32], int64 --> int64 ) is native(LIB) { * }
 
         multi method write-int(Audio::Sndfile::Info $info, @items  --> Int ) {
             self.write-write($info, &sf_writef_int, int32, @items);
@@ -432,7 +434,7 @@ class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
             self.write-write(&sf_writef_int, $frames-in, $frames);
         }
 
-        sub sf_readf_double(File , CArray[num64] is rw, int64 --> int64 ) is native('sndfile',v1) { * }
+        sub sf_readf_double(File , CArray[num64] is rw, int64 --> int64 ) is native(LIB) { * }
 
         multi method read-double(Int $frames, Audio::Sndfile::Info $info --> Array ) {
             self.read-read($frames, $info, &sf_readf_double, num64);
@@ -442,7 +444,7 @@ class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
             self.read-read($frames, $info, &sf_readf_double, num64, :raw);
         }
 
-        sub sf_writef_double(File , CArray[num64], int64 --> int64 ) is native('sndfile',v1) { * }
+        sub sf_writef_double(File , CArray[num64], int64 --> int64 ) is native(LIB) { * }
 
         multi method write-double(Audio::Sndfile::Info $info, @items --> Int ) {
             self.write-write($info, &sf_writef_double, num64, @items);
@@ -451,7 +453,7 @@ class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
             self.write-write(&sf_writef_double, $frames-in, $frames);
         }
 
-        sub sf_readf_float(File , CArray[num32] is rw, int64 --> int64 ) is native('sndfile',v1) { * }
+        sub sf_readf_float(File , CArray[num32] is rw, int64 --> int64 ) is native(LIB) { * }
 
         multi method read-float(Int $frames, Audio::Sndfile::Info $info --> Array ) {
             self.read-read($frames, $info, &sf_readf_float, num32);
@@ -460,7 +462,7 @@ class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
             self.read-read($frames, $info, &sf_readf_float, num32, :raw);
         }
 
-        sub sf_writef_float(File , CArray[num32], int64 --> int64 ) is native('sndfile',v1) { * }
+        sub sf_writef_float(File , CArray[num32], int64 --> int64 ) is native(LIB) { * }
 
         multi method write-float(Audio::Sndfile::Info $info, @items --> Int ) {
             self.write-write($info, &sf_writef_float, num32, @items);
@@ -469,7 +471,7 @@ class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
             self.write-write(&sf_writef_float, $frames-in, $frames);
         }
 
-        sub sf_write_sync(File) is native('sndfile',v1) { * }
+        sub sf_write_sync(File) is native(LIB) { * }
 
         method sync() {
             sf_write_sync(self);
@@ -484,13 +486,13 @@ class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
     has Audio::Sndfile::Info $.info handles <format channels samplerate frames sections seekable type sub-type endian duration>;
     has OpenMode $.mode;
 
-    sub sf_version_string( --> Str ) is native('sndfile',v1) { * }
+    sub sf_version_string( --> Str ) is native(LIB) { * }
 
     method library-version(--> Str ) {
         sf_version_string();
     }
 
-    sub sf_open(Str $filename, int32 $mode, Audio::Sndfile::Info $info --> File ) is native('sndfile',v1) { * }
+    sub sf_open(Str $filename, int32 $mode, Audio::Sndfile::Info $info --> File ) is native(LIB) { * }
 
     submethod BUILD(Str() :$!filename!, Bool :$r, Bool :$w, Bool :$rw, Audio::Sndfile::Info :$!info?,  *%info) {
         if one($r, $w, $rw ) {
