@@ -24,7 +24,6 @@
   "license": "Artistic-2.0",
   "test-depends": [
     "Test",
-    "Test::META",
     "LibraryCheck",
     "File::Find",
     "Shell::Command"
