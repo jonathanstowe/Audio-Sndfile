@@ -53,7 +53,7 @@ In the description of the [methods](#METHODS) below a 'frame' refers to one or m
 
 The write methods will throw an exception if supplied with an array that isn't some multiple of the number of channels and will always return the number of 'frames' written.
 
-There are no methods provided for interleaving or de-interleaving frame data as Perl's list methods (e.g. `zip` or `rotor`) are perfect for this task.
+There are no methods provided for interleaving or de-interleaving frame data as Raku's list methods (e.g. `zip` or `rotor`) are perfect for this task.
 
 METHODS
 -------
@@ -64,7 +64,7 @@ METHODS
 
 The `:r` adverb opens the specified file for reading. If the file can't be opened or there is some other problem with it (such as it not being a supported format,) then an exception will be thrown.
 
-    method new(Audio::Sndfile:U: Str :$filename!, :w, Audio::Sndfile::Info :$info) 
+    method new(Audio::Sndfile:U: Str :$filename!, :w, Audio::Sndfile::Info :$info)
     method new(Audio::Sndfile:U: Str :$filename!, :w, *%info)
 
 The `:w` adverb opens the specified file for writing. It requires either an existing valid [Audio::Sndfile::Info](Audio::Sndfile::Info) supplied as the `info` named parameter, or attributes that will be passed to the constructor of [Audio::Sndfile::Info](Audio::Sndfile::Info). If the file cannot be opened for some reason or the resulting [Audio::Sndfile::Info](Audio::Sndfile::Info) is incomplete or invalid an exception will be thrown.
@@ -77,37 +77,37 @@ This is an accessor to the [Audio::Sndfile::Info](Audio::Sndfile::Info) for the 
 
 There are several accessors delegated to this object:
 
-  * format 
+  * format
 
 The format of the file formed by the bitwise or of `type`, `sub-type` and `endian`
 
-  * channels 
+  * channels
 
 The number of channels in the file.
 
-  * samplerate 
+  * samplerate
 
 The sample rate of the file as an Int (e.g. 44100, 48000).
 
-  * frames 
+  * frames
 
 The number of frames in the file. This only makes sense when the file is opened for reading.
 
-  * sections 
+  * sections
 
-  * seekable 
+  * seekable
 
 A Bool indicating whether the open file is seekable, this will be True for most regular files and False for special files such as a pipe, however as there currently isn't any easy way to open other than a regular file this may not be useful.
 
-  * type 
+  * type
 
 A value of the enum [Audio::Sndfile::Info::Format](Audio::Sndfile::Info::Format) indicating the major format of the file (e.g. WAV,) this is bitwise or-ed with the `sub-type` and `endian` to create `format` (which is what is used by the underlying library functions.)
 
-  * sub-type 
+  * sub-type
 
 A value of the enum [Audio::Sndfile::Info::Subformat](Audio::Sndfile::Info::Subformat) indicating the minor format or sample encoding of the file (e.g PCM_16, FLOAT, ) this is bitwise or-ed with the `type` and `endian` to create `format`
 
-  * endian 
+  * endian
 
 A value of the enum [Audio::Sndfile::Info::End](Audio::Sndfile::Info::End) that indicate the endian-ness of the sample data. This is bitwise or-ed with `type` and `sub-type` to provide `format`.
 
@@ -121,19 +121,19 @@ A [Duration](Duration) object that describes the duration of the file in (possib
 
 Returns a string representation of the version reported by libsndfile.
 
-### close 
+### close
 
     method close(Audio::Sndfile:D:) returns Int
 
 This closes the file stream for the opened file. Attempting to write or read the object after this has been called is an error.
 
-### error-number 
+### error-number
 
     method error-number(Audio::Sndfile:D:) returns Int
 
 This returns non-zero if there was an error in the last read, write or open operation. The actual error message can be obtained with [error](#error) below.
 
-### error 
+### error
 
     method error(Audio::Sndfile:D:) returns Str
 
@@ -241,300 +241,3 @@ The second multi is for the convenience of applications which may have obtained 
 
 This returns a new [Audio::Sndfile::Info](Audio::Sndfile::Info) based on the details of the current file suitable for being passed to [new](#new) for instance when copying or converting the file.
 
-NAME
-====
-
-Audio::Sndfile::Info - describe an opened audio file
-
-SYNOPSIS
-========
-
-        my $info = Audio::Sndfile::Info.new(channels => 2, samplerate => 44100, format => 0x00010002);
-        say $info.type;
-
-DESCRIPTION
-===========
-
-The objects of type [Audio::Sndfile::Info](Audio::Sndfile::Info) can be passed to the constructor of [Audio::Sndfile](Audio::Sndfile) when opening the file for writing and can be obtained from the `info` accessor of an [Audio::Sndfile](Audio::Sndfile) that was opened for reading. It is a representation of the `SF_INFO` struct used by `libsndfile` to pass this information around.
-
-It is unlikely that changing the values of any of the attributes in the object will make sense after the object has been constructed.
-
-METHODS
--------
-
-Where indicated some of these attributes can be passed as named arguments to  [Audio::Sndfile](Audio::Sndfile) constructor when opening for writing.
-
-### frames
-
-This returns an Int indicating the number of the frames in a file, this only makes sense when the file is opened for reading, it is ignored when the file is opened for writing and it is not updated while new data is written to the file. The number of frames is the number of sample items / channels.
-
-### channels
-
-The number of channels in the data of this file. This is required when opening a file for writing.
-
-### format
-
-An Int that describes the format of the file. This is the bitwise or of `type`, `sub-type` and `endian`. It is required when opening a file for writing and providing a value that is not legal will result in an exception.
-
-### samplerate
-
-This is the sample rate of the frame data in frames / second. This is required when opening a file for writing. It is important to note though that if data is being read from one file and written to the other (i.e. copying or format converting) then setting this to any other value than that of the incoming file will not cause an automatic sample rate conversion and will simply have the effect of slowing down or speeding up the playback of the written data. If you want samplerate conversion you will either need to process the data yourself to add or remove the required frames (inferring the values in the up-sampling case,) or use some other library such as `libsamplerate`.
-
-### sections
-
-An Int that indicates the number of (format dependent) sections in the file. This is not required for opening a file for writing.
-
-### seekable
-
-This is a Boolean to indicate whether the input or output file is seekable, it will be true for most regular files and False for other special files, however as it is currently difficult to open other than regular files this can be mostly ignored.
-
-### format-check
-
-    method format-check() returns Bool
-
-This returns a Bool to indicate whether the [format](#format) in the current object makes sense. Attempting to use a setting of [format](#format) where this is not true will cause an exception to be thrown.
-
-### type
-
-    method type() returns Format
-
-This is a value of the enum [Audio::Sndfile::Info::Format](Audio::Sndfile::Info::Format) that indicates the major format of the file (e.g. WAV, FLAC ..). It is bitwise or-ed with `sub-type` and `endian` to provide [format](#format).
-
-### sub-type
-
-    method sub-type() returns Subformat
-
-This is a value of the enum [Audio::Sndfile::Info::Subformat](Audio::Sndfile::Info::Subformat) that indicate the minor format or sample encoding of the data (e.g. PCM_16, FLOAT ... ). It is bitwise or-ed with `type` and `endian` to provide [format](#format).
-
-### endian
-
-    method endian() returns End
-
-This is a value of the enum [Audio::Sndfile::Info::End](Audio::Sndfile::Info::End) which indicates the endian-ness of the samples in the data. It is bitwise or-ed with `type` and `sub-type` to make [format](#format).
-
-### duration
-
-    method duration() returns Duration
-
-enum Audio::Sndfile::Info::Format
----------------------------------
-
-This describes the major format of the file as described above in [type](#type). The possible values are described below, it should be borne in mind that only certain combinations of `type` and `sub-type` make sense, this is detailed in [http://www.mega-nerd.com/libsndfile/#Features](http://www.mega-nerd.com/libsndfile/#Features)
-
-  * WAV
-
-    Microsoft WAV format (little endian default).
-
-  * AIFF
-
-    Apple/SGI AIFF format (big endian).
-
-  * AU
-
-    Sun/NeXT AU format (big endian).
-
-  * RAW
-
-    RAW PCM data.
-
-  * PAF
-
-    Ensoniq PARIS file format.
-
-  * SVX
-
-    Amiga IFF / SVX8 / SV16 format.
-
-  * NIST
-
-    Sphere NIST format.
-
-  * VOC
-
-    VOC files.
-
-  * IRCAM
-
-    Berkeley/IRCAM/CARL
-
-  * W64
-
-    Sonic Foundry's 64 bit RIFF/WAV
-
-  * MAT4
-
-    Matlab (tm) V4.2 / GNU Octave 2.0
-
-  * MAT5
-
-    Matlab (tm) V5.0 / GNU Octave 2.1
-
-  * PVF
-
-    Portable Voice Format
-
-  * XI
-
-    Fasttracker 2 Extended Instrument
-
-  * HTK
-
-    HMM Tool Kit format
-
-  * SDS
-
-    Midi Sample Dump Standard
-
-  * AVR
-
-    Audio Visual Research
-
-  * WAVEX
-
-    MS WAVE with WAVEFORMATEX
-
-  * SD2
-
-    Sound Designer 2
-
-  * FLAC
-
-    FLAC lossless file format
-
-  * CAF
-
-    Core Audio File format
-
-  * WVE
-
-    Psion WVE format
-
-  * OGG
-
-    Xiph OGG container
-
-  * MPC2K
-
-    Akai MPC 2000 sampler
-
-  * RF64
-
-    RF64 WAV file
-
-enum Audio::Sndfile::Info::Subformat
-------------------------------------
-
-These describe the minor format or sample encoding of the format. As suggested above only certain combnations of Format and Subformat actually make sense.
-
-  * PCM_S8
-
-    Signed 8 bit data
-
-  * PCM_16
-
-    Signed 16 bit data
-
-  * PCM_24
-
-    Signed 24 bit data
-
-  * PCM_32
-
-    Signed 32 bit data
-
-  * PCM_U8
-
-    Unsigned 8 bit data (WAV and RAW only)
-
-  * FLOAT
-
-    32 bit float data
-
-  * DOUBLE
-
-    64 bit float data
-
-  * ULAW
-
-    U-Law encoded.
-
-  * ALAW
-
-    A-Law encoded.
-
-  * IMA_ADPCM
-
-    IMA ADPCM.
-
-  * MS_ADPCM
-
-    Microsoft ADPCM.
-
-  * GSM610
-
-    GSM 6.10 encoding.
-
-  * VOX_ADPCM
-
-    OKI / Dialogix ADPCM
-
-  * G721_32
-
-    32kbs G721 ADPCM encoding.
-
-  * G723_24
-
-    24kbs G723 ADPCM encoding.
-
-  * G723_40
-
-    40kbs G723 ADPCM encoding.
-
-  * DWVW_12
-
-    12 bit Delta Width Variable Word encoding.
-
-  * DWVW_16
-
-    16 bit Delta Width Variable Word encoding.
-
-  * DWVW_24
-
-    24 bit Delta Width Variable Word encoding.
-
-  * DWVW_N
-
-    N bit Delta Width Variable Word encoding.
-
-  * DPCM_8
-
-    8 bit differential PCM (XI only)
-
-  * DPCM_16
-
-    16 bit differential PCM (XI only)
-
-  * VORBIS
-
-    Xiph Vorbis encoding.
-
-Audio::Sndfile::Info::End
--------------------------
-
-These describe the endian-ness of the file format. Typically a file opened for reading will use `File` if the format defines an endian-ness and this should also be used when opening a file for writing unless there is some particular reason not to.
-
-  * File
-
-Default file endian-ness
-
-  * Little
-
-Force little endian-ness
-
-  * Big
-
-Force big endian-ness.
-
-  * Cpu
-
-Force CPU endian-ness.

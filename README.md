@@ -2,7 +2,7 @@
 
 Binding to libsndfile ( http://www.mega-nerd.com/libsndfile/ )
 
-[![Build Status](https://travis-ci.org/jonathanstowe/Audio-Sndfile.svg?branch=master)](https://travis-ci.org/jonathanstowe/Audio-Sndfile)
+![Build Status](https://github.com/jonathanstowe/Audio-Sndfile/workflows/CI/badge.svg)
 
 ## Description
 
@@ -41,8 +41,7 @@ http://www.mega-nerd.com/libsndfile/#Download
 
 I am however unlikely to be able to offer help with installing it this way.
 
-Assuming you have a working perl6 installation you should be able to
-install this with *zef* :
+Assuming you have a working Rakudo installation you should be able to install this with *zef* :
 
     # From the source directory
    
@@ -77,4 +76,4 @@ This is free software.
 
 Please see the [LICENCE](LICENCE) file in the distribution.
 
-© Jonathan Stowe 2015 - 2019
+© Jonathan Stowe 2015 - 2021

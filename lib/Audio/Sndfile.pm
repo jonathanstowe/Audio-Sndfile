@@ -78,7 +78,7 @@ isn't some multiple of the number of channels and will always return
 the number of 'frames' written.
 
 There are no methods provided for interleaving or de-interleaving frame
-data as Perl's list methods (e.g. C<zip> or C<rotor>) are perfect for
+data as Raku's list methods (e.g. C<zip> or C<rotor>) are perfect for
 this task.
 
 =head2 METHODS
@@ -91,7 +91,7 @@ The C<:r> adverb opens the specified file for reading.  If the file
 can't be opened or there is some other problem with it (such as it not
 being a supported format,) then an exception will be thrown.
 
-    method new(Audio::Sndfile:U: Str :$filename!, :w, Audio::Sndfile::Info :$info) 
+    method new(Audio::Sndfile:U: Str :$filename!, :w, Audio::Sndfile::Info :$info)
     method new(Audio::Sndfile:U: Str :$filename!, :w, *%info)
 
 The C<:w> adverb opens the specified file for writing.  It requires
@@ -114,47 +114,47 @@ opened.
 
 There are several accessors delegated to this object:
 
-=item format 
+=item format
 
 The format of the file formed by the bitwise or of C<type>, C<sub-type>
 and C<endian>
 
-=item channels 
+=item channels
 
 The number of channels in the file.
 
-=item samplerate 
+=item samplerate
 
 The sample rate of the file as an Int (e.g. 44100, 48000).
 
-=item frames 
+=item frames
 
 The number of frames in the file.  This only makes sense when the file
 is opened for reading.
 
-=item sections 
+=item sections
 
-=item seekable 
+=item seekable
 
 A Bool indicating whether the open file is seekable, this will be True
 for most regular files and False for special files such as a pipe,
 however as there currently isn't any easy way to open other than a
 regular file this may not be useful.
 
-=item type 
+=item type
 
 A value of the enum L<Audio::Sndfile::Info::Format> indicating the major
 format of the file (e.g. WAV,) this is bitwise or-ed with the C<sub-type>
 and C<endian> to create C<format> (which is what is used by the underlying
 library functions.)
 
-=item sub-type 
+=item sub-type
 
 A value of the enum L<Audio::Sndfile::Info::Subformat> indicating the
 minor format or sample encoding of the file (e.g PCM_16, FLOAT, ) this
 is bitwise or-ed with the C<type> and C<endian> to create C<format>
 
-=item endian 
+=item endian
 
 A value of the enum L<Audio::Sndfile::Info::End> that indicate the
 endian-ness of the sample data.  This is bitwise or-ed with C<type>
@@ -172,14 +172,14 @@ for reading.
 
 Returns a string representation of the version reported by libsndfile.
 
-=head3 close 
+=head3 close
 
     method close(Audio::Sndfile:D:) returns Int
 
 This closes the file stream for the opened file. Attempting to write or
 read the object after this has been called is an error.
 
-=head3 error-number 
+=head3 error-number
 
     method error-number(Audio::Sndfile:D:) returns Int
 
@@ -187,7 +187,7 @@ This returns non-zero if there was an error in the last read, write
 or open operation. The actual error message can be obtained with
 L<error|#error> below.
 
-=head3 error 
+=head3 error
 
     method error(Audio::Sndfile:D:) returns Str
 
@@ -379,7 +379,7 @@ class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
 
             my ($buff, $rc ) =  self.read-read($frames, $info, &read-sub, $type, :raw).list;
             my @tmp_arr =  (^($rc * $info.channels)).map({ $buff[$_] });
-            
+
             @tmp_arr;
         }
 
@@ -482,7 +482,7 @@ class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
     enum OpenMode (:Read(0x10), :Write(0x20), :ReadWrite(0x30));
 
     has Str  $.filename;
-    has File $!file handles <close error-number error sync>; 
+    has File $!file handles <close error-number error sync>;
     has Audio::Sndfile::Info $.info handles <format channels samplerate frames sections seekable type sub-type endian duration>;
     has OpenMode $.mode;
 
@@ -542,7 +542,7 @@ class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
     multi method read-int(Int $frames, :$raw! --> RawEncode ) {
         $!file.read-int($frames, $!info, :raw);
     }
-        
+
     multi method write-int(@frames --> Int ) {
         self!assert-frame-length(@frames);
         $!file.write-int($!info, @frames);
@@ -557,7 +557,7 @@ class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
     multi method read-float(Int $frames, :$raw! --> RawEncode ) {
         $!file.read-float($frames, $!info, :raw);
     }
-        
+
     multi method write-float(@frames --> Int ) {
         self!assert-frame-length(@frames);
         $!file.write-float($!info, @frames);
@@ -602,4 +602,4 @@ class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
 }
 
 
-# vim: expandtab shiftwidth=4 ft=perl6
+# vim: expandtab shiftwidth=4 ft=raku

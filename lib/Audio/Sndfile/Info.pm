@@ -29,7 +29,7 @@ sense after the object has been constructed.
 
 =head2 METHODS
 
-Where indicated some of these attributes can be passed as named arguments to 
+Where indicated some of these attributes can be passed as named arguments to
 L<Audio::Sndfile> constructor when opening for writing.
 
 =head3 frames
@@ -336,7 +336,7 @@ Force CPU endian-ness.
 
 =end pod
 
-class Audio::Sndfile::Info:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> is repr('CStruct') {
+class Audio::Sndfile::Info:ver<0.0.14>:auth<github:jonathanstowe>:api<1.0> is repr('CStruct') {
     has int64     $.frames;
     has int32     $.samplerate;
     has int32     $.channels;
@@ -434,4 +434,4 @@ class Audio::Sndfile::Info:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> is re
     }
 }
 
-# vim: expandtab shiftwidth=4 ft=perl6
+# vim: expandtab shiftwidth=4 ft=raku

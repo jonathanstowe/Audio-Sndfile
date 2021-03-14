@@ -1,4 +1,4 @@
-#!perl6
+#!raku
 
 use v6;
 
@@ -6,7 +6,7 @@ use Test;
 
 plan 51;
 
-use Shell::Command;
+use File::Directory::Tree;
 
 use NativeCall;
 
@@ -21,7 +21,7 @@ if !library-exists('sndfile', v1) {
 
 my $test-output = "t/test-output".IO;
 $test-output.mkdir unless $test-output.d;
-END { $test-output and rm_rf $test-output }
+END { $test-output and rmtree( $test-output ) }
 
 my $rc;
 
@@ -135,4 +135,4 @@ lives-ok { $double-obj-in.close }, "close that";
 
 done-testing;
 
-# vim: expandtab shiftwidth=4 ft=perl6
+# vim: expandtab shiftwidth=4 ft=raku
