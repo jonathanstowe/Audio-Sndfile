@@ -1,3 +1,5 @@
+v0.0.15	Sun  7 Aug 09:45:40 BST 2022
+	* Upload to zef repository
 v0.0.14		Sun 14 Mar 11:37:54 GMT 2021
 	* Rename Perl6 → Raku
 	* Spring clean
@@ -21,3 +23,4 @@ v0.0.8		Thu Dec 24 14:49:16 2015 +0000
 	* Add version/auth to Audio::Sndfile::Info
 	* Update documentation to include multis
 	* Add proper synopsis
+
