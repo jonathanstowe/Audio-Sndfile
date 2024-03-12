@@ -24,7 +24,7 @@
   "meta-version": "1",
   "resources": [
   ],
-  "version": "0.0.15",
+  "version": "0.0.16",
   "test-depends": [
     "Test",
     "LibraryCheck",
@@ -32,8 +32,8 @@
   ],
   "description": "Binding for libsndfile - read/write multiple audio formats",
   "provides": {
-    "Audio::Sndfile": "lib/Audio/Sndfile.pm",
-    "Audio::Sndfile::Info": "lib/Audio/Sndfile/Info.pm"
+    "Audio::Sndfile": "lib/Audio/Sndfile.rakumod",
+    "Audio::Sndfile::Info": "lib/Audio/Sndfile/Info.rakumod"
   },
   "name": "Audio::Sndfile"
 }

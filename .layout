@@ -176,7 +176,7 @@
               "children": [
                 {
                   "type": "file",
-                  "name": "Info.pm"
+                  "name": "Info.rakumod"
                 }
               ],
               "purpose": null,
@@ -184,7 +184,7 @@
               "name": "Sndfile"
             },
             {
-              "name": "Sndfile.pm",
+              "name": "Sndfile.rakumod",
               "type": "file"
             }
           ]

@@ -340,7 +340,7 @@ copying or converting the file.
 
 =end pod
 
-class Audio::Sndfile:ver<0.0.13>:auth<github:jonathanstowe>:api<1.0> {
+class Audio::Sndfile {
 
     my constant LIB = [ 'sndfile', v1 ];
 

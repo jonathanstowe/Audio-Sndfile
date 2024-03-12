@@ -2,7 +2,7 @@
 
 Binding to libsndfile ( http://www.mega-nerd.com/libsndfile/ )
 
-![Build Status](https://github.com/jonathanstowe/Audio-Sndfile/workflows/CI/badge.svg)
+[![CI](https://github.com/jonathanstowe/Audio-Sndfile/actions/workflows/main.yml/badge.svg)](https://github.com/jonathanstowe/Audio-Sndfile/actions/workflows/main.yml)
 
 ## Description
 
@@ -76,4 +76,4 @@ This is free software.
 
 Please see the [LICENCE](LICENCE) file in the distribution.
 
-© Jonathan Stowe 2015 - 2021
+© Jonathan Stowe 2015 - 2024
